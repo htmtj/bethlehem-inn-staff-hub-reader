@@ -978,6 +978,37 @@ select {
   color: #203d49;
 }
 
+.related-links {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.related-links h2 {
+  margin-bottom: 12px;
+  font-size: 1.15rem;
+}
+
+.related-links ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: 10px;
+}
+
+.related-links a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--teal-700);
+  font-weight: 700;
+  gap: 7px;
+}
+
+.related-links a:hover {
+  color: var(--teal-800);
+}
+
 .article-facts {
   padding: 30px;
   border: 1px solid var(--line);

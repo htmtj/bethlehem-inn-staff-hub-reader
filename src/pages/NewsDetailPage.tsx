@@ -1,4 +1,4 @@
-import { ArrowLeft, CalendarDays, CircleAlert, Contact, ListChecks, Tag } from "lucide-react";
+import { ArrowLeft, CalendarDays, CircleAlert, Contact, ExternalLink, ListChecks, Tag } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { formatDate, getDepartmentName, news } from "../lib/content";
 import { NotFoundPage } from "./NotFoundPage";
@@ -7,6 +7,9 @@ export function NewsDetailPage() {
   const { slug } = useParams();
   const item = news.find((entry) => entry.slug === slug);
   if (!item) return <NotFoundPage />;
+  const relatedLinks = item.resourceLinks.filter(
+    (link): link is { label: string; url: string } => Boolean(link.url),
+  );
 
   return (
     <article className="page-width article-page">
@@ -28,6 +31,20 @@ export function NewsDetailPage() {
       <div className="article-layout">
         <div className="article-body">
           {item.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          {relatedLinks.length ? (
+            <section aria-labelledby="related-links-heading" className="related-links">
+              <h2 id="related-links-heading">Related links</h2>
+              <ul>
+                {relatedLinks.map((link) => (
+                  <li key={`${link.label}-${link.url}`}>
+                    <a href={link.url} rel="noopener noreferrer" target="_blank">
+                      {link.label} <ExternalLink aria-hidden="true" size={17} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           <div className="sample-disclaimer">
             <strong>Sample content only</strong>
             <p>This fictional entry demonstrates the reader experience and contains no confidential Bethlehem Inn information.</p>

@@ -20,15 +20,18 @@ export const resources = resourcesJson as ResourceItem[];
 
 const asTime = (value: string) => new Date(value).getTime();
 
+export function isNewsActiveAt(item: NewsItem, timestamp: number): boolean {
+  return (
+    (item.status === "published" || item.status === "scheduled") &&
+    asTime(item.publishedAt) <= timestamp &&
+    (!item.expiresAt || asTime(item.expiresAt) > timestamp)
+  );
+}
+
 export function getActiveNews(now = new Date()): NewsItem[] {
   const timestamp = now.getTime();
   return news
-    .filter(
-      (item) =>
-        item.status === "published" &&
-        asTime(item.publishedAt) <= timestamp &&
-        (!item.expiresAt || asTime(item.expiresAt) > timestamp),
-    )
+    .filter((item) => isNewsActiveAt(item, timestamp))
     .sort((a, b) => {
       if (a.pinned !== b.pinned) return Number(b.pinned) - Number(a.pinned);
       return asTime(b.publishedAt) - asTime(a.publishedAt);
@@ -150,7 +153,7 @@ export function searchHub(query: string, now = new Date()): SearchResult[] {
       type: "Resource",
       title: item.title,
       description: item.description,
-      meta: `${item.category} · Sample resource`,
+      meta: `${item.category}${item.destinationUrl ? "" : " · Sample resource"}`,
       href: `/resources?focus=${item.id}`,
     }));
 

@@ -7,6 +7,7 @@ import { departments, getActiveResources, getDepartmentName } from "../lib/conte
 const categories = [
   "All",
   "Employee Tools",
+  "Onboarding",
   "Forms",
   "Policies & Procedures",
   "Training",
@@ -93,7 +94,7 @@ export function ResourcesPage() {
       {focused ? (
         <aside aria-labelledby="resource-preview-heading" className="resource-preview">
           <button aria-label="Close resource details" className="icon-button" onClick={closePreview} type="button"><X aria-hidden="true" /></button>
-          <span className="sample-resource-label">Sample resource</span>
+          {!focused.destinationUrl ? <span className="sample-resource-label">Sample resource</span> : null}
           <h2 id="resource-preview-heading">{focused.title}</h2>
           <p>{focused.description}</p>
           <dl>
@@ -101,16 +102,29 @@ export function ResourcesPage() {
             <div><dt>Department</dt><dd>{getDepartmentName(focused.department)}</dd></div>
             <div><dt>Resource type</dt><dd>{focused.resourceType}</dd></div>
           </dl>
-          <div className="sample-disclaimer">
-            <Info aria-hidden="true" />
-            <div>
-              <strong>Destination intentionally withheld</strong>
-              <p>An authoritative link will be added only after it is approved. This beta does not expose or guess internal resource URLs.</p>
-            </div>
-          </div>
-          <button className="button button--disabled" disabled type="button">
-            Open resource <ExternalLink aria-hidden="true" size={18} />
-          </button>
+          {focused.destinationUrl ? (
+            <a
+              className="button button--primary"
+              href={focused.destinationUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Open resource <ExternalLink aria-hidden="true" size={18} />
+            </a>
+          ) : (
+            <>
+              <div className="sample-disclaimer">
+                <Info aria-hidden="true" />
+                <div>
+                  <strong>Destination intentionally withheld</strong>
+                  <p>An authoritative link will be added only after it is approved. This beta does not expose or guess internal resource URLs.</p>
+                </div>
+              </div>
+              <button className="button button--disabled" disabled type="button">
+                Open resource <ExternalLink aria-hidden="true" size={18} />
+              </button>
+            </>
+          )}
         </aside>
       ) : null}
     </div>

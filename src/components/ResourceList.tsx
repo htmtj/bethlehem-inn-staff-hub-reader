@@ -28,7 +28,7 @@ export function ResourceList({ items }: { items: ResourceItem[] }) {
             </span>
             <span className="resource-list__meta">
               <span>{getDepartmentName(item.department)}</span>
-              <small>{item.category} · Sample resource</small>
+              <small>{item.category}{item.destinationUrl ? "" : " · Sample resource"}</small>
             </span>
             <ArrowRight aria-hidden="true" className="row-arrow" size={21} />
           </Link>

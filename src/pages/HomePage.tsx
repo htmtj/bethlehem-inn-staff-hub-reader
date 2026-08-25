@@ -144,7 +144,7 @@ export function HomePage() {
         <div className="section-heading-row">
           <div>
             <h2 id="resources-heading">Quick resources</h2>
-            <p>Common destinations, clearly marked as sample placeholders in this beta.</p>
+            <p>Common staff destinations and approved resources.</p>
           </div>
           <Link className="text-link home-resources-link" to="/resources">
             Browse all resources <ArrowRight aria-hidden="true" size={18} />
@@ -158,7 +158,7 @@ export function HomePage() {
               </span>
               <span>
                 <strong>{resource.title}</strong>
-                <small>{resource.category} · Sample resource</small>
+                <small>{resource.category}{resource.destinationUrl ? "" : " · Sample resource"}</small>
               </span>
               <ArrowRight aria-hidden="true" size={20} />
             </Link>

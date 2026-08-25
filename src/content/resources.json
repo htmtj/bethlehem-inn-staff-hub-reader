@@ -1,5 +1,16 @@
 [
   {
+    "id": "resource-013",
+    "title": "BI Onboarding Portal",
+    "description": "Opens the Bethlehem Inn onboarding portal for new and returning staff.",
+    "category": "Onboarding",
+    "department": "administration",
+    "destinationUrl": "https://bionboarding.netlify.app/",
+    "featured": true,
+    "resourceType": "Portal",
+    "status": "published"
+  },
+  {
     "id": "resource-001",
     "title": "Employee self-service",
     "description": "Sample entry for payroll, benefits, time-off, and employee tools.",
