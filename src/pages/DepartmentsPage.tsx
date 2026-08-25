@@ -12,7 +12,7 @@ export function DepartmentsPage() {
     <div className="page-width page-stack">
       <header className="page-header">
         <h1>Departments</h1>
-        <p>Each space brings together department news, upcoming items, and commonly used sample resources without becoming a separate mini-site.</p>
+        <p>Each space brings together department news, upcoming items, and commonly used staff resources without becoming a separate mini-site.</p>
       </header>
       <section aria-labelledby="department-directory-heading">
         <h2 id="department-directory-heading" className="sr-only">Department directory</h2>

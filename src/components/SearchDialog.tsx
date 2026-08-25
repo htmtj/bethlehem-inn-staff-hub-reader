@@ -42,7 +42,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         <div className="search-dialog__header">
           <div>
             <h2>Search the Staff Hub</h2>
-            <p>Find active news, upcoming items, departments, and sample resources.</p>
+            <p>Find active news, upcoming items, departments, and staff resources.</p>
           </div>
           <button aria-label="Close search" className="icon-button" onClick={onClose} type="button">
             <X aria-hidden="true" />
@@ -62,7 +62,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         </label>
         <div aria-live="polite" className="search-results">
           {!query.trim() ? (
-            <p className="search-prompt">Start typing to search the active sample content.</p>
+            <p className="search-prompt">Start typing to search current Staff Hub content.</p>
           ) : results.length ? (
             <>
               <p className="result-count">
