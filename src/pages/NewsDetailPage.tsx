@@ -1,11 +1,12 @@
 import { ArrowLeft, CalendarDays, CircleAlert, Contact, ExternalLink, ListChecks, Tag } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import { formatDate, getDepartmentName, news } from "../lib/content";
+import { formatDate, getActiveNews, getArchivedNews, getDepartmentName } from "../lib/content";
 import { NotFoundPage } from "./NotFoundPage";
 
 export function NewsDetailPage() {
   const { slug } = useParams();
-  const item = news.find((entry) => entry.slug === slug);
+  const now = new Date();
+  const item = [...getActiveNews(now), ...getArchivedNews(now)].find((entry) => entry.slug === slug);
   if (!item) return <NotFoundPage />;
   const relatedLinks = item.resourceLinks.filter(
     (link): link is { label: string; url: string } => Boolean(link.url),
