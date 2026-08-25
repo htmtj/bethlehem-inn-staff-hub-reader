@@ -1,0 +1,52 @@
+[
+  {
+    "id": "programs",
+    "name": "Programs",
+    "displayName": "Programs",
+    "description": "Updates, upcoming dates, and frequently used resources for the Programs team.",
+    "ownerLabel": "Sample Programs contact",
+    "active": true,
+    "displayOrder": 1,
+    "accent": "teal"
+  },
+  {
+    "id": "facilities",
+    "name": "Facilities",
+    "displayName": "Facilities",
+    "description": "Building, maintenance, safety, and campus access information.",
+    "ownerLabel": "Sample Facilities contact",
+    "active": true,
+    "displayOrder": 2,
+    "accent": "blue"
+  },
+  {
+    "id": "kitchen",
+    "name": "Kitchen",
+    "displayName": "Kitchen",
+    "description": "Meal service, food safety, delivery, and kitchen operations updates.",
+    "ownerLabel": "Sample Kitchen contact",
+    "active": true,
+    "displayOrder": 3,
+    "accent": "lime"
+  },
+  {
+    "id": "development",
+    "name": "Development",
+    "displayName": "Development",
+    "description": "Fundraising, donor engagement, events, and community partnership updates.",
+    "ownerLabel": "Sample Development contact",
+    "active": true,
+    "displayOrder": 4,
+    "accent": "violet"
+  },
+  {
+    "id": "administration",
+    "name": "Administration",
+    "displayName": "Administration / Organization-wide",
+    "description": "Organization-wide policies, staff information, and administrative updates.",
+    "ownerLabel": "Sample Administration contact",
+    "active": true,
+    "displayOrder": 5,
+    "accent": "gold"
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "id": "event-001",
+    "title": "All-staff meeting",
+    "startAt": "2026-08-26T10:00:00-07:00",
+    "endAt": "2026-08-26T11:00:00-07:00",
+    "category": "Meeting",
+    "department": "administration",
+    "location": "Sample community room",
+    "description": "Fictional all-staff meeting entry for layout and discovery testing.",
+    "link": null,
+    "priority": "standard",
+    "status": "published"
+  },
+  {
+    "id": "event-002",
+    "title": "Food-handler refresher",
+    "startAt": "2026-09-02T13:00:00-07:00",
+    "endAt": "2026-09-02T14:30:00-07:00",
+    "category": "Training",
+    "department": "kitchen",
+    "location": "Sample training room",
+    "description": "Sample training date; no real course or staff information is included.",
+    "link": null,
+    "priority": "high",
+    "status": "published"
+  },
+  {
+    "id": "event-003",
+    "title": "Annual emergency drill",
+    "startAt": "2026-09-03T09:00:00-07:00",
+    "endAt": "2026-09-03T11:00:00-07:00",
+    "category": "Operations",
+    "department": "administration",
+    "location": "Sample location",
+    "description": "Fictional drill used to demonstrate an Important News and Upcoming connection.",
+    "link": null,
+    "priority": "urgent",
+    "status": "published"
+  },
+  {
+    "id": "event-004",
+    "title": "North entrance work begins",
+    "startAt": "2026-09-08T07:00:00-07:00",
+    "endAt": null,
+    "category": "Facilities",
+    "department": "facilities",
+    "location": "Sample campus area",
+    "description": "A sample all-day facilities milestone.",
+    "link": null,
+    "priority": "high",
+    "status": "published"
+  },
+  {
+    "id": "event-005",
+    "title": "Programs team meeting",
+    "startAt": "2026-09-10T09:00:00-07:00",
+    "endAt": "2026-09-10T10:00:00-07:00",
+    "category": "Meeting",
+    "department": "programs",
+    "location": "Sample meeting room",
+    "description": "Fictional Programs event for department filtering.",
+    "link": null,
+    "priority": "standard",
+    "status": "published"
+  },
+  {
+    "id": "event-006",
+    "title": "Quarterly impact briefing",
+    "startAt": "2026-09-15T09:00:00-07:00",
+    "endAt": "2026-09-15T10:00:00-07:00",
+    "category": "Briefing",
+    "department": "development",
+    "location": "Sample community room",
+    "description": "Sample organizational briefing with no real impact or donor data.",
+    "link": null,
+    "priority": "standard",
+    "status": "published"
+  },
+  {
+    "id": "event-007",
+    "title": "Kitchen delivery window review",
+    "startAt": "2026-09-17T14:00:00-07:00",
+    "endAt": "2026-09-17T14:30:00-07:00",
+    "category": "Operations",
+    "department": "kitchen",
+    "location": "Sample kitchen office",
+    "description": "Fictional operations check-in for department-page testing.",
+    "link": null,
+    "priority": "standard",
+    "status": "published"
+  }
+]

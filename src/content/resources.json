@@ -1,0 +1,134 @@
+[
+  {
+    "id": "resource-001",
+    "title": "Employee self-service",
+    "description": "Sample entry for payroll, benefits, time-off, and employee tools.",
+    "category": "Employee Tools",
+    "department": "administration",
+    "destinationUrl": null,
+    "featured": true,
+    "resourceType": "Staff tool",
+    "status": "published"
+  },
+  {
+    "id": "resource-002",
+    "title": "Incident report form",
+    "description": "Sample form entry for reporting an incident or safety concern.",
+    "category": "Forms",
+    "department": "administration",
+    "destinationUrl": null,
+    "featured": true,
+    "resourceType": "Form",
+    "status": "published"
+  },
+  {
+    "id": "resource-003",
+    "title": "Emergency response guide",
+    "description": "Sample procedures entry; no real emergency information is published in this beta.",
+    "category": "Policies & Procedures",
+    "department": "facilities",
+    "destinationUrl": null,
+    "featured": true,
+    "resourceType": "Guide",
+    "status": "published"
+  },
+  {
+    "id": "resource-004",
+    "title": "Food safety procedures",
+    "description": "Sample resource showing where approved food-handling standards could be linked.",
+    "category": "Policies & Procedures",
+    "department": "kitchen",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Procedure",
+    "status": "published"
+  },
+  {
+    "id": "resource-005",
+    "title": "Donation intake checklist",
+    "description": "Sample checklist for consistent donation intake steps.",
+    "category": "Forms",
+    "department": "development",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Checklist",
+    "status": "published"
+  },
+  {
+    "id": "resource-006",
+    "title": "New staff orientation guide",
+    "description": "Sample orientation resource entry for future approved training materials.",
+    "category": "Training",
+    "department": "administration",
+    "destinationUrl": null,
+    "featured": true,
+    "resourceType": "Guide",
+    "status": "published"
+  },
+  {
+    "id": "resource-007",
+    "title": "Evening handoff checklist",
+    "description": "Sample Programs checklist associated with a fictional department update.",
+    "category": "Department Resources",
+    "department": "programs",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Checklist",
+    "status": "published"
+  },
+  {
+    "id": "resource-008",
+    "title": "Maintenance request",
+    "description": "Sample form entry for routine building and equipment requests.",
+    "category": "Forms",
+    "department": "facilities",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Form",
+    "status": "published"
+  },
+  {
+    "id": "resource-009",
+    "title": "Meal service reference",
+    "description": "Sample Kitchen reference for approved schedules and procedures.",
+    "category": "Department Resources",
+    "department": "kitchen",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Reference",
+    "status": "published"
+  },
+  {
+    "id": "resource-010",
+    "title": "Community partnership toolkit",
+    "description": "Sample Development resource entry for future approved materials.",
+    "category": "Department Resources",
+    "department": "development",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Toolkit",
+    "status": "published"
+  },
+  {
+    "id": "resource-011",
+    "title": "Staff forms library",
+    "description": "Sample index for commonly used internal forms and templates.",
+    "category": "Forms",
+    "department": "administration",
+    "destinationUrl": null,
+    "featured": true,
+    "resourceType": "Directory",
+    "status": "published"
+  },
+  {
+    "id": "resource-012",
+    "title": "Policy acknowledgement archive",
+    "description": "Archived sample resource that should not appear in the active directory.",
+    "category": "Policies & Procedures",
+    "department": "administration",
+    "destinationUrl": null,
+    "featured": false,
+    "resourceType": "Archive",
+    "status": "archived"
+  }
+]
