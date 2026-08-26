@@ -59,17 +59,30 @@ export function getImportantNews(now = new Date()): NewsItem[] {
 export function getActiveEvents(now = new Date()): EventItem[] {
   const dayStart = new Date(now);
   dayStart.setHours(0, 0, 0, 0);
+  const timestamp = now.getTime();
   return events
     .filter(
       (item) =>
-        item.status === "published" &&
+        (item.status === "published" ||
+          (item.status === "scheduled" &&
+            Boolean(item.publishedAt) &&
+            asTime(item.publishedAt as string) <= timestamp)) &&
+        (!item.expiresAt || asTime(item.expiresAt) > timestamp) &&
         asTime(item.endAt ?? item.startAt) >= dayStart.getTime(),
     )
     .sort((a, b) => asTime(a.startAt) - asTime(b.startAt));
 }
 
-export function getActiveResources(): ResourceItem[] {
-  return resources.filter((item) => item.status === "published");
+export function getActiveResources(now = new Date()): ResourceItem[] {
+  const timestamp = now.getTime();
+  return resources.filter(
+    (item) =>
+      (item.status === "published" ||
+        (item.status === "scheduled" &&
+          Boolean(item.publishedAt) &&
+          asTime(item.publishedAt as string) <= timestamp)) &&
+      (!item.expiresAt || asTime(item.expiresAt) > timestamp),
+  );
 }
 
 export function getDepartment(id: string | undefined): Department | undefined {

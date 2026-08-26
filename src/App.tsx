@@ -1,4 +1,5 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
+import { AdminPage } from "./admin/AdminPage";
 import { AppShell } from "./components/AppShell";
 import { DepartmentPage } from "./pages/DepartmentPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
@@ -10,6 +11,12 @@ import { ResourcesPage } from "./pages/ResourcesPage";
 import { UpcomingPage } from "./pages/UpcomingPage";
 
 export default function App() {
+  const location = useLocation();
+
+  if (location.pathname === "/admin" || location.pathname.startsWith("/admin/")) {
+    return <AdminPage />;
+  }
+
   return (
     <AppShell>
       <Routes>

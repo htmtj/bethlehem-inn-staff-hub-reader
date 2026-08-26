@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cloudflare/pages-plugin-cloudflare-access':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@fontsource-variable/inter':
         specifier: ^5.2.8
         version: 5.3.0
@@ -127,6 +130,9 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
+
+  '@cloudflare/pages-plugin-cloudflare-access@1.0.5':
+    resolution: {integrity: sha512-EGVSaUoFLxKfds2tgLWGzIk/xXLO2RqwZDUKsH/olXdNOckOMr4ShR8Pt1AJpZrakCDNiDVXmfLDJYTufxuQRw==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1100,6 +1106,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
+
+  '@cloudflare/pages-plugin-cloudflare-access@1.0.5': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

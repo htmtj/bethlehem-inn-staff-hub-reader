@@ -11,6 +11,7 @@
     "check": "pnpm test && pnpm build"
   },
   "dependencies": {
+    "@cloudflare/pages-plugin-cloudflare-access": "^1.0.5",
     "@fontsource-variable/inter": "^5.2.8",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",

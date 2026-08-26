@@ -26,6 +26,8 @@ export type NewsItem = {
   resourceLinks: ResourceLink[];
   image: string | null;
   imageAlt: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type EventItem = {
@@ -40,6 +42,10 @@ export type EventItem = {
   link: string | null;
   priority: Priority;
   status: ContentStatus;
+  publishedAt?: string | null;
+  expiresAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type ResourceItem = {
@@ -52,6 +58,10 @@ export type ResourceItem = {
   featured: boolean;
   resourceType: string;
   status: ContentStatus;
+  publishedAt?: string | null;
+  expiresAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Department = {
