@@ -1,5 +1,30 @@
 [
   {
+    "id": "news-33105886-7e75-4155-8687-a06ea0174a1a",
+    "slug": "qa-publisher-persistence-check-33105886",
+    "title": "QA — Publisher persistence check",
+    "summary": "Disposable production verification item; safe to archive after QA.",
+    "body": [
+      "This synthetic QA item verifies the production GitHub-backed publishing path. It contains no Bethlehem Inn operational information."
+    ],
+    "department": "administration",
+    "category": "Department update",
+    "publishedAt": "2026-09-09T16:50:20.935Z",
+    "effectiveAt": null,
+    "expiresAt": null,
+    "status": "published",
+    "priority": "standard",
+    "pinned": false,
+    "actionNeeded": false,
+    "actionText": null,
+    "contact": "",
+    "resourceLinks": [],
+    "image": null,
+    "imageAlt": null,
+    "createdAt": "2026-09-09T16:50:21.794Z",
+    "updatedAt": "2026-09-09T16:50:21.794Z"
+  },
+  {
     "id": "news-001",
     "slug": "annual-emergency-drill-updated-arrival-plan",
     "title": "Annual emergency drill: updated arrival plan",
