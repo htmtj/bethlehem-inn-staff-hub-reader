@@ -2,7 +2,17 @@
 
 ## Current boundary
 
-The authoritative calendar is `casemanagement@bethleheminn.org`. The connected account can read it, but the Staff Hub deployment has no Calendar credential and must not use a browser connector session as an application credential.
+The existing source calendar is `casemanagement@bethleheminn.org`. The connected account can read it, but the Staff Hub deployment has no Calendar credential and must not use a browser connector session as an application credential.
+
+A dedicated staff-safe calendar was created for the eventual one-way feed:
+
+- Name: `Bethlehem Inn Staff Hub Events`
+- Calendar ID: `c_9ebfb87e322a0337c45664a545ed09ab877983d3fd73dbceaf8af5f76b270122@group.calendar.google.com`
+- Owner: `jobs@bethleheminn.org`
+- Sharing: owner-only (not public); organization-wide availability is enabled with “See event details”
+- Current contents: empty; no Case Management records were copied
+
+This calendar is intentionally not yet connected to production. No public iCal or secret iCal address is used.
 
 The current calendar contains Bend events as well as participant names, case-management titles, notes, and internal locations. The public Reader must never receive those raw records.
 
@@ -14,7 +24,7 @@ The existing Google Identity client is for sign-in and does not grant Calendar A
 
 ## Eligibility gate
 
-Do not ingest the current mixed-use calendar until events have a deterministic staff-safe signal. Preferred options are:
+Do not ingest the current mixed-use calendar until events have a deterministic staff-safe signal. The dedicated calendar above is now the preferred source. Other acceptable options are:
 
 1. a dedicated curated Staff Hub / Staff Events calendar, or
 2. an explicit marker such as `STAFF_HUB_PUBLIC` maintained by an authorized calendar owner.
@@ -36,4 +46,3 @@ Strip all other fields. Stable identity, duplicate detection, recurrence expansi
 ## Failure behavior
 
 Calendar reads are one-way and read-only. If authorization, the API, or the eligibility gate fails, the Reader keeps its existing Upcoming content and shows a neutral unavailable state. Logs contain status, operation, and error class only; never event text, participant data, or credentials.
-
