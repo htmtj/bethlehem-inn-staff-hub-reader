@@ -23,6 +23,9 @@ export function useCalendarEvents(): { events: EventItem[]; state: CalendarFeedS
     };
   }, []);
 
-  const active = useMemo(() => mergeEvents(getActiveEvents(), calendarEvents), [calendarEvents]);
+  const active = useMemo(
+    () => mergeEvents(state === "unavailable" ? getActiveEvents() : [], calendarEvents),
+    [calendarEvents, state],
+  );
   return { events: active, state };
 }

@@ -24,7 +24,7 @@ export function HomePage() {
   const secondary = important.slice(1);
   const importantIds = new Set(important.map((item) => item.id));
   const latest = getActiveNews().filter((item) => !importantIds.has(item.id)).slice(0, 4);
-  const { events: upcoming } = useCalendarEvents();
+  const { events: upcoming, state: calendarState } = useCalendarEvents();
   const quickResources = getActiveResources().filter((item) => item.featured).slice(0, 4);
 
   return (
@@ -112,7 +112,9 @@ export function HomePage() {
               <h2 id="upcoming-heading">Upcoming</h2>
               <CalendarDays aria-hidden="true" className="heading-icon" />
             </div>
-            <UpcomingList items={upcoming} limit={3} />
+            <p className="feed-intro">Approved staff events and organizational dates.</p>
+            {calendarState === "unavailable" ? <p className="feed-notice" role="status">Calendar refresh is temporarily unavailable; showing published Hub items.</p> : null}
+            <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading"} />
             <Link className="text-link section-link" to="/upcoming">
               View all upcoming <ArrowRight aria-hidden="true" size={18} />
             </Link>

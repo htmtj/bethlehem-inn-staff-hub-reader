@@ -51,7 +51,7 @@ export function UpcomingPage() {
           </label>
         </div>
         <div className="upcoming-page-list">
-          <UpcomingList items={filtered} />
+      <UpcomingList items={filtered} loading={state === "loading"} />
         </div>
       </section>
     </div>

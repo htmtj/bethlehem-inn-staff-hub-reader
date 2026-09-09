@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type PropsWithChildren } from "react";
-import { Menu, Search, X } from "lucide-react";
+import { Menu, Search, ShieldCheck, X } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { SearchDialog } from "./SearchDialog";
 
@@ -54,8 +54,14 @@ export function AppShell({ children }: PropsWithChildren) {
                 {item.label}
               </NavLink>
             ))}
+            <Link className="mobile-admin-link" to="/admin">
+              <ShieldCheck aria-hidden="true" size={17} /> Staff Admin
+            </Link>
           </nav>
           <div className="header-actions">
+            <Link aria-label="Staff Admin" className="header-admin-link" title="Staff Admin" to="/admin">
+              <ShieldCheck aria-hidden="true" size={17} /> <span>Staff Admin</span>
+            </Link>
             <button className="header-search" onClick={() => setSearchOpen(true)} type="button">
               <Search aria-hidden="true" size={20} />
               <span>Search the Staff Hub</span>
