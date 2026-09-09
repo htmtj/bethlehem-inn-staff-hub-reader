@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-The existing source calendar is `casemanagement@bethleheminn.org`. The connected account can read it, but the Staff Hub deployment has no Calendar credential and must not use a browser connector session as an application credential.
+The existing source calendar is `casemanagement@bethleheminn.org`. The connected account can read it, but the Staff Hub must not use that mixed-use calendar or a browser connector session as an application credential.
 
 A dedicated staff-safe calendar was created for the eventual one-way feed:
 
@@ -20,7 +20,7 @@ The current calendar contains Bend events as well as participant names, case-man
 
 Use the `/api/calendar` Cloudflare Pages Function as the only Calendar reader. It uses a dedicated service identity with `https://www.googleapis.com/auth/calendar.events.readonly` and a direct reader ACL on the dedicated calendar. The service-account JSON is stored as the encrypted Production secret `GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON`; no access token, private key, attendee list, organizer identity, attachment, Meet link, raw description, raw location, or Google event ID is sent to the Reader.
 
-The existing Google Identity client is for sign-in and does not grant Calendar API access. Calendar authorization therefore needs a separate server-side delegated authorization, or an approved safe-calendar/proxy owned by Bethlehem Inn.
+The existing Google Identity client is for sign-in and does not grant Calendar API access. Calendar authorization is provided here by the separate server-side service identity below; offline OAuth remains a fallback if the service-identity path is later retired.
 
 Credential decision record:
 
