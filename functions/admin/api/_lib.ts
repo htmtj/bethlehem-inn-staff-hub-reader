@@ -14,7 +14,7 @@ export type ContentType = (typeof contentTypes)[number];
 export type ContentStatus = (typeof contentStatuses)[number];
 
 export type RoleRecord = {
-  role: "publisher" | "admin";
+  role: "publisher" | "admin" | "ed_publisher";
   department: DepartmentId;
 };
 
@@ -144,7 +144,7 @@ function normalizePriority(value: unknown, actor: Actor): "standard" | "high" | 
 }
 
 function targetDepartment(value: unknown, actor: Actor): DepartmentId {
-  if (actor.role === "publisher") {
+  if (actor.role !== "admin") {
     if (value !== undefined && value !== null && value !== "" && value !== actor.department) {
       throw new RequestError(403, "You cannot publish content for another department.");
     }
@@ -165,7 +165,7 @@ function statusAndPublishTime(
 }
 
 export function parseRoleRecord(raw: unknown, email: string): Actor {
-  if (!isRecord(raw) || (raw.role !== "publisher" && raw.role !== "admin")) {
+  if (!isRecord(raw) || !["publisher", "admin", "ed_publisher"].includes(String(raw.role))) {
     throw new RequestError(403, "This account does not have Staff Hub publishing access.");
   }
   if (!isDepartment(raw.department)) {
@@ -174,7 +174,10 @@ export function parseRoleRecord(raw: unknown, email: string): Actor {
   if (raw.role === "publisher" && raw.department === "administration") {
     throw new RequestError(403, "Organization-wide publishing requires an administrator role.");
   }
-  return { email: email.trim().toLowerCase(), role: raw.role, department: raw.department };
+  if (raw.role === "ed_publisher" && raw.department !== "administration") {
+    throw new RequestError(403, "Executive Director publishing requires the ED Message scope.");
+  }
+  return { email: email.trim().toLowerCase(), role: raw.role as RoleRecord["role"], department: raw.department };
 }
 
 export function parseMutationRequest(value: unknown): MutationRequest {
@@ -193,17 +196,55 @@ export function parseMutationRequest(value: unknown): MutationRequest {
 }
 
 export function canManageDepartment(actor: Actor, department: unknown): boolean {
-  return actor.role === "admin" || department === actor.department;
+  return actor.role === "admin" || (actor.role === "publisher" && department === actor.department);
 }
 
-export function filterItemsForActor<T extends { department?: unknown }>(actor: Actor, items: T[]): T[] {
-  return actor.role === "admin" ? items : items.filter((item) => item.department === actor.department);
-}
+export const ED_MESSAGE_LANE = "executive-director-message";
+export const ED_MESSAGE_CATEGORY = "Executive Director Message";
 
-function assertOwnsExisting(actor: Actor, item: Record<string, unknown>): void {
-  if (!canManageDepartment(actor, item.department)) {
-    throw new RequestError(403, "You cannot manage content for another department.");
+export function assertContentTypeAllowed(actor: Actor, contentType: ContentType): void {
+  if (actor.role === "ed_publisher" && contentType !== "news") {
+    throw new RequestError(403, "Your role can manage Executive Director messages only.");
   }
+}
+
+function canManageItem(actor: Actor, item: { department?: unknown; lane?: unknown }, contentType: ContentType): boolean {
+  if (actor.role === "ed_publisher") {
+    return contentType === "news" && item.department === "administration" && item.lane === ED_MESSAGE_LANE;
+  }
+  // A forged ED marker never broadens a department publisher's authority.
+  if (actor.role === "publisher" && item.lane === ED_MESSAGE_LANE) return false;
+  return canManageDepartment(actor, item.department);
+}
+
+export function filterItemsForActor<T extends { department?: unknown; lane?: unknown }>(actor: Actor, items: T[], contentType: ContentType): T[] {
+  return items.filter((item) => canManageItem(actor, item, contentType));
+}
+
+function assertOwnsExisting(actor: Actor, item: Record<string, unknown>, contentType: ContentType): void {
+  if (!canManageItem(actor, item, contentType)) {
+    throw new RequestError(403, "You cannot manage content outside your publishing scope.");
+  }
+}
+
+function newsLane(input: Record<string, unknown>, actor: Actor, existing: Record<string, unknown> | undefined): string | undefined {
+  const supplied = input.lane === undefined ? existing?.lane : input.lane;
+  if (supplied !== undefined && supplied !== null && supplied !== "" && supplied !== ED_MESSAGE_LANE) {
+    throw new RequestError(400, "Choose a valid message lane.");
+  }
+  if (actor.role === "ed_publisher") {
+    if (supplied !== undefined && supplied !== ED_MESSAGE_LANE) {
+      throw new RequestError(403, "Executive Director messages cannot be moved to another lane.");
+    }
+    return ED_MESSAGE_LANE;
+  }
+  if (supplied === ED_MESSAGE_LANE) {
+    if (actor.role !== "admin" || input.department !== "administration") {
+      throw new RequestError(403, "Executive Director messages require their authorized publishing scope.");
+    }
+    return ED_MESSAGE_LANE;
+  }
+  return undefined;
 }
 
 function sanitizeNews(
@@ -213,6 +254,13 @@ function sanitizeNews(
   now: Date,
   idFactory: () => string,
 ): Record<string, unknown> {
+  const lane = newsLane(input, actor, existing);
+  const category = lane === ED_MESSAGE_LANE
+    ? ED_MESSAGE_CATEGORY
+    : cleanString(input.category, "Category", 80) || "Department update";
+  if (!lane && category.toLowerCase() === ED_MESSAGE_CATEGORY.toLowerCase()) {
+    throw new RequestError(400, "Use the Executive Director Message lane for this category.");
+  }
   const timing = statusAndPublishTime(input, now);
   const title = cleanString(input.title, "Title", 180, true);
   const body = parseBody(input.body ?? input.details);
@@ -237,7 +285,8 @@ function sanitizeNews(
     summary: cleanString(input.summary, "Summary", 360, timing.status !== "draft"),
     body,
     department: targetDepartment(input.department, actor),
-    category: cleanString(input.category, "Category", 80) || "Department update",
+    ...(lane ? { lane } : {}),
+    category,
     publishedAt: timing.publishedAt ?? now.toISOString(),
     effectiveAt: validIso(input.effectiveAt, "Effective date"),
     expiresAt: validIso(input.expiresAt, "Expiration date"),
@@ -330,6 +379,7 @@ export function applyMutation(options: {
   idFactory?: () => string;
 }): { item: Record<string, unknown>; items: Array<Record<string, unknown>> } {
   const { actor, request } = options;
+  assertContentTypeAllowed(actor, request.contentType);
   const now = options.now ?? new Date();
   const idFactory = options.idFactory ?? (() => crypto.randomUUID());
   const items = [...options.items];
@@ -342,7 +392,7 @@ export function applyMutation(options: {
 
   if (request.operation !== "create") {
     if (!existing) throw new RequestError(404, "This content item no longer exists.");
-    assertOwnsExisting(actor, existing);
+    assertOwnsExisting(actor, existing, request.contentType);
   }
 
   if (request.operation === "archive") {
@@ -362,7 +412,7 @@ export function applyMutation(options: {
       ? sanitizeEvent(request.item, actor, existing, now, idFactory)
       : sanitizeResource(request.item, actor, existing, now, idFactory);
 
-  if (!canManageDepartment(actor, sanitized.department)) {
+  if (!canManageItem(actor, sanitized, request.contentType)) {
     throw new RequestError(403, "You cannot publish content for another department.");
   }
 

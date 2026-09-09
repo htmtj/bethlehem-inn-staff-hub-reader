@@ -342,8 +342,8 @@ export function AdminPage() {
           <div className="admin-account">
             <div>
               <strong>{actor.email}</strong>
-              <span>{actor.role === "admin" ? "Administrator" : "Department Publisher"}</span>
-              <small>{getDepartmentName(actor.department)}</small>
+              <span>{actor.role === "admin" ? "Administrator" : actor.role === "ed_publisher" ? "Executive Director Publisher" : "Department Publisher"}</span>
+              <small>{actor.role === "ed_publisher" ? "Executive Director Message only" : getDepartmentName(actor.department)}</small>
             </div>
             <a className="admin-header-link" href="/">Open Staff Hub</a>
             <a className="admin-header-link" href={signOutHref}><LogOut aria-hidden="true" size={17} /> Sign Out</a>
@@ -354,13 +354,15 @@ export function AdminPage() {
       <main className="admin-main" id="main-content">
         <div className="admin-intro">
           <div>
-            <h1>Manage Staff Hub content</h1>
-            <p>Create, review, and publish updates, upcoming items, and resources for staff.</p>
+            <h1>{actor.role === "ed_publisher" ? "Manage Executive Director messages" : "Manage Staff Hub content"}</h1>
+            <p>{actor.role === "ed_publisher" ? "Create, edit, schedule, and archive messages in the Executive Director Message lane." : "Create, review, and publish updates, upcoming items, and resources for staff."}</p>
           </div>
           <div className="admin-primary-actions" aria-label="Create content">
-            <button className="button button--primary" onClick={() => beginNew("news")} type="button"><Plus aria-hidden="true" size={19} /> New Update</button>
+            <button className="button button--primary" onClick={() => beginNew("news")} type="button"><Plus aria-hidden="true" size={19} /> {actor.role === "ed_publisher" ? "New ED Message" : "New Update"}</button>
+            {actor.role !== "ed_publisher" ? <>
             <button className="button button--secondary" onClick={() => beginNew("events")} type="button"><CalendarPlus aria-hidden="true" size={19} /> Add Upcoming Item</button>
             <button className="button button--secondary" onClick={() => beginNew("resources")} type="button"><FilePlus2 aria-hidden="true" size={19} /> Add Resource</button>
+            </> : null}
           </div>
         </div>
 
@@ -384,7 +386,7 @@ export function AdminPage() {
               ))}
             </div>
             <div className="admin-filters">
-              <label>
+              {actor.role !== "ed_publisher" ? <label>
                 <span className="sr-only">Content type</span>
                 <select onChange={(event) => setTypeFilter(event.target.value as AdminContentType | "all")} value={typeFilter}>
                   <option value="all">All content types</option>
@@ -392,7 +394,7 @@ export function AdminPage() {
                   <option value="events">Upcoming</option>
                   <option value="resources">Resources</option>
                 </select>
-              </label>
+              </label> : null}
               {actor.role === "admin" ? (
                 <label>
                   <span className="sr-only">Department</span>

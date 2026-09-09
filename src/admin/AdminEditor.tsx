@@ -14,6 +14,7 @@ type EditorValue = {
   expiresAt: string;
   priority: "standard" | "high" | "urgent";
   category: string;
+  lane: "" | "executive-director-message";
   summary: string;
   details: string;
   effectiveAt: string;
@@ -75,7 +76,8 @@ function emptyValue(contentType: AdminContentType, actor: AdminActor): EditorVal
     publishedAt: "",
     expiresAt: "",
     priority: "standard",
-    category: contentType === "news" ? "Department update" : contentType === "events" ? "Meeting" : "Department Resources",
+    category: actor.role === "ed_publisher" ? "Executive Director Message" : contentType === "news" ? "Department update" : contentType === "events" ? "Meeting" : "Department Resources",
+    lane: actor.role === "ed_publisher" ? "executive-director-message" : "",
     summary: "",
     details: "",
     effectiveAt: "",
@@ -108,6 +110,7 @@ function valueFromContent(editing: ManagedContent | null, contentType: AdminCont
 
   if (editing.contentType === "news") {
     const item = editing.item;
+    value.lane = item.lane ?? "";
     value.priority = item.priority;
     value.category = item.category;
     value.summary = item.summary;
@@ -164,6 +167,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
   }, [previewOpen]);
 
   const isAdmin = actor.role === "admin";
+  const isEdPublisher = actor.role === "ed_publisher";
   const submitLabel = value.status === "scheduled" ? "Schedule" : "Publish now";
   const previewBody = useMemo(() => value.details.split(/\n\s*\n/).filter(Boolean), [value.details]);
 
@@ -190,6 +194,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
       return {
         ...common,
         category: value.category,
+        lane: value.lane || null,
         summary: value.summary,
         body: previewBody,
         effectiveAt: fromInputDate(value.effectiveAt),
@@ -231,7 +236,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
     <section aria-labelledby="editor-heading" className="admin-editor">
       <div className="admin-editor__heading">
         <div>
-          <h2 id="editor-heading">{editing ? `Edit ${typeLabel(value.contentType)}` : `New ${typeLabel(value.contentType)}`}</h2>
+          <h2 id="editor-heading">{editing ? "Edit" : "New"} {isEdPublisher ? "Executive Director Message" : typeLabel(value.contentType)}</h2>
           <p>{editing ? "Update the content, preview it, then save your changes." : "Create a clear, staff-ready item without editing the website."}</p>
         </div>
         <button aria-label="Close editor" className="icon-button" onClick={onCancel} type="button">
@@ -240,6 +245,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
       </div>
 
       {error ? <p className="admin-message admin-message--error" role="alert">{error}</p> : null}
+      {isEdPublisher ? <p className="admin-message">Published messages appear in News, Latest Updates, search, and Administration. Important priority may also place a message in Important News. The Reader is public: include only information approved for public display.</p> : null}
 
       <form className="admin-form" onSubmit={(event) => event.preventDefault()}>
         <div className="admin-form__main">
@@ -348,14 +354,28 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
           <label className="admin-field">
             <span>Department / Scope</span>
             {isAdmin ? (
-              <select onChange={(event) => change("department", event.target.value)} value={value.department}>
+              <select disabled={value.lane === "executive-director-message"} onChange={(event) => change("department", event.target.value)} value={value.department}>
                 {departments.map((department) => <option key={department} value={department}>{getDepartmentName(department)}</option>)}
               </select>
             ) : (
-              <input aria-describedby="fixed-department" readOnly value={getDepartmentName(actor.department)} />
+              <input aria-describedby="fixed-department" readOnly value={isEdPublisher ? "Executive Director Message" : getDepartmentName(actor.department)} />
             )}
             {!isAdmin ? <small id="fixed-department">Your publishing scope is set by your role.</small> : null}
           </label>
+
+          {isAdmin && value.contentType === "news" ? (
+            <label className="admin-field">
+              <span>Message lane</span>
+              <select value={value.lane} onChange={(event) => {
+                const lane = event.target.value as EditorValue["lane"];
+                setValue((current) => ({ ...current, lane, category: lane ? "Executive Director Message" : "Department update", department: lane ? "administration" : current.department }));
+              }}>
+                <option value="">Department update</option>
+                <option value="executive-director-message">Executive Director Message</option>
+              </select>
+              <small>ED messages can also be managed by the Executive Director Publisher.</small>
+            </label>
+          ) : null}
 
           <label className="admin-field">
             <span>Category</span>
@@ -364,7 +384,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
                 {resourceCategories.map((category) => <option key={category}>{category}</option>)}
               </select>
             ) : (
-              <input maxLength={100} onChange={(event) => change("category", event.target.value)} value={value.category} />
+              <input readOnly={value.lane === "executive-director-message"} maxLength={100} onChange={(event) => change("category", event.target.value)} value={value.category} />
             )}
           </label>
 

@@ -7,6 +7,7 @@ export type ResourceLink = {
 };
 
 export type NewsItem = {
+  lane?: "executive-director-message";
   id: string;
   slug: string;
   title: string;

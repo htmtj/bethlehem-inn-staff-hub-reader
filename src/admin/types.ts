@@ -1,6 +1,6 @@
 import type { EventItem, NewsItem, ResourceItem } from "../types/content";
 
-export type AdminRole = "publisher" | "admin";
+export type AdminRole = "publisher" | "admin" | "ed_publisher";
 export type AdminContentType = "news" | "events" | "resources";
 
 export type AdminActor = {

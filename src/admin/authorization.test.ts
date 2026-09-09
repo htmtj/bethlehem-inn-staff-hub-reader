@@ -5,6 +5,7 @@ import {
   filterItemsForActor,
   parseMutationRequest,
   parseRoleRecord,
+  ED_MESSAGE_LANE,
   type Actor,
 } from "../../functions/admin/api/_lib";
 
@@ -23,6 +24,11 @@ const facilitiesPublisher: Actor = {
   email: "publisher.facilities@example.invalid",
   role: "publisher",
   department: "facilities",
+};
+const executiveDirectorPublisher: Actor = {
+  email: "michael@bethleheminn.org",
+  role: "ed_publisher",
+  department: "administration",
 };
 
 const news = (department = "programs") => ({
@@ -89,12 +95,23 @@ describe("publisher role resolution", () => {
     expectRequestError(() => parseRoleRecord({ role: "viewer", department: "programs" }, "viewer@example.invalid"), 403);
     expectRequestError(() => parseRoleRecord({ role: "publisher", department: "other" }, "publisher@example.invalid"), 403);
     expectRequestError(() => parseRoleRecord({ role: "publisher", department: "administration" }, "publisher@example.invalid"), 403);
+    expect(parseRoleRecord({ role: "ed_publisher", department: "administration" }, " Michael@Bethleheminn.org ")).toEqual(executiveDirectorPublisher);
+    expectRequestError(() => parseRoleRecord({ role: "ed_publisher", department: "programs" }, "michael@bethleheminn.org"), 403);
   });
 
   it("filters publisher reads to the assigned department while admins see all", () => {
     const items = [news("programs"), news("facilities")];
-    expect(filterItemsForActor(programsPublisher, items).map((item) => item.department)).toEqual(["programs"]);
-    expect(filterItemsForActor(administrator, items)).toHaveLength(2);
+    expect(filterItemsForActor(programsPublisher, items, "news").map((item) => item.department)).toEqual(["programs"]);
+    expect(filterItemsForActor(administrator, items, "news")).toHaveLength(2);
+  });
+
+  it("filters the Executive Director publisher to the ED Message lane", () => {
+    const items = [
+      { ...news("administration"), lane: ED_MESSAGE_LANE },
+      news("administration"),
+      news("programs"),
+    ];
+    expect(filterItemsForActor(executiveDirectorPublisher, items, "news")).toEqual([items[0]]);
   });
 });
 
@@ -168,6 +185,67 @@ describe("server-side content authorization", () => {
       idFactory: () => "resource-id",
     });
     expect(resource.item.department).toBe("programs");
+  });
+
+  it("allows the Executive Director publisher to manage only ED Message news", () => {
+    const created = applyMutation({
+      actor: executiveDirectorPublisher,
+      items: [],
+      request: {
+        contentType: "news",
+        operation: "create",
+        expectedSha: "sha-ed",
+        item: {
+          title: "Executive Director sample message",
+          summary: "A synthetic ED message for authorization testing.",
+          body: ["Synthetic details only."],
+          department: "administration",
+          status: "published",
+          category: "Executive Director Message",
+        },
+      },
+      now: NOW,
+      idFactory: () => "ed-id",
+    });
+    expect(created.item.lane).toBe(ED_MESSAGE_LANE);
+    expect(created.item.department).toBe("administration");
+    expectRequestError(
+      () => applyMutation({
+        actor: executiveDirectorPublisher,
+        items: [],
+        request: { contentType: "events", operation: "create", expectedSha: "sha-events", item: { title: "No", status: "draft" } },
+        now: NOW,
+      }),
+      403,
+    );
+    expectRequestError(
+      () => applyMutation({
+        actor: executiveDirectorPublisher,
+        items: [news("administration")],
+        request: { contentType: "news", operation: "archive", expectedSha: "sha-ed", item: { id: "news-administration" } },
+        now: NOW,
+      }),
+      403,
+    );
+    const archived = applyMutation({
+      actor: executiveDirectorPublisher,
+      items: created.items,
+      request: { contentType: "news", operation: "archive", expectedSha: "sha-ed", item: { id: created.item.id } },
+      now: NOW,
+    });
+    expect(archived.item.status).toBe("archived");
+  });
+
+  it("prevents a normal publisher from forging the ED Message lane", () => {
+    expectRequestError(
+      () => applyMutation({
+        actor: programsPublisher,
+        items: [],
+        request: createNewsRequest({ department: "administration", category: "Executive Director Message", lane: ED_MESSAGE_LANE }),
+        now: NOW,
+      }),
+      403,
+    );
   });
 
   it("applies the same ownership boundary to a Facilities publisher", () => {

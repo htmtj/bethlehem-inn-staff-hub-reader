@@ -2,6 +2,7 @@ import type { PluginData } from "@cloudflare/pages-plugin-cloudflare-access";
 import {
   RequestError,
   applyMutation,
+  assertContentTypeAllowed,
   filterItemsForActor,
   parseMutationRequest,
   parseRoleRecord,
@@ -183,15 +184,15 @@ async function handleRequest(context: FunctionContext): Promise<Response> {
     const token = tokenFromEnv(context.env);
     const [news, events, resources] = await Promise.all([
       readFile(token, "news"),
-      readFile(token, "events"),
-      readFile(token, "resources"),
+      actor.role === "ed_publisher" ? { sha: "", items: [] } : readFile(token, "events"),
+      actor.role === "ed_publisher" ? { sha: "", items: [] } : readFile(token, "resources"),
     ]);
     return json({
       actor,
       content: {
-        news: { ...news, items: filterItemsForActor(actor, news.items) },
-        events: { ...events, items: filterItemsForActor(actor, events.items) },
-        resources: { ...resources, items: filterItemsForActor(actor, resources.items) },
+        news: { ...news, items: filterItemsForActor(actor, news.items, "news") },
+        events: { ...events, items: filterItemsForActor(actor, events.items, "events") },
+        resources: { ...resources, items: filterItemsForActor(actor, resources.items, "resources") },
       },
     });
   }
@@ -200,6 +201,7 @@ async function handleRequest(context: FunctionContext): Promise<Response> {
     assertSameOrigin(context.request);
     const token = tokenFromEnv(context.env);
     const mutation = parseMutationRequest(await context.request.json());
+    assertContentTypeAllowed(actor, mutation.contentType);
     const current = await readFile(token, mutation.contentType);
     if (current.sha !== mutation.expectedSha) {
       throw new RequestError(
