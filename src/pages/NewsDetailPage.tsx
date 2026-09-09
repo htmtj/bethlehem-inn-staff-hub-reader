@@ -26,7 +26,7 @@ export function NewsDetailPage() {
         <div className="article-byline">
           <span>Published {formatDate(item.publishedAt)}</span>
           <span>{getDepartmentName(item.department)}</span>
-          {item.status === "archived" ? <span>Archived sample</span> : null}
+          {item.status === "archived" ? <span>Archived</span> : null}
         </div>
       </header>
       <div className="article-layout">
@@ -46,10 +46,6 @@ export function NewsDetailPage() {
               </ul>
             </section>
           ) : null}
-          <div className="sample-disclaimer">
-            <strong>Sample content only</strong>
-            <p>This fictional entry demonstrates the reader experience and contains no confidential Bethlehem Inn information.</p>
-          </div>
         </div>
         <aside aria-label="Update details" className="article-facts">
           <h2>Update details</h2>

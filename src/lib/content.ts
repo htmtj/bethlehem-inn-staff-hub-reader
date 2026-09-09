@@ -166,7 +166,7 @@ export function searchHub(query: string, now = new Date()): SearchResult[] {
       type: "Resource",
       title: item.title,
       description: item.description,
-      meta: `${item.category}${item.destinationUrl ? "" : " · Sample resource"}`,
+      meta: `${item.category}${item.destinationUrl ? "" : " · Link pending approval"}`,
       href: `/resources?focus=${item.id}`,
     }));
 

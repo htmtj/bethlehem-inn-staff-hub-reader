@@ -94,7 +94,7 @@ export function ResourcesPage() {
       {focused ? (
         <aside aria-labelledby="resource-preview-heading" className="resource-preview">
           <button aria-label="Close resource details" className="icon-button" onClick={closePreview} type="button"><X aria-hidden="true" /></button>
-          {!focused.destinationUrl ? <span className="sample-resource-label">Sample resource</span> : null}
+          {!focused.destinationUrl ? <span className="sample-resource-label">Link pending approval</span> : null}
           <h2 id="resource-preview-heading">{focused.title}</h2>
           <p>{focused.description}</p>
           <dl>
@@ -117,7 +117,7 @@ export function ResourcesPage() {
                 <Info aria-hidden="true" />
                 <div>
                   <strong>Destination intentionally withheld</strong>
-                  <p>An authoritative link will be added only after it is approved. This beta does not expose or guess internal resource URLs.</p>
+                  <p>An authoritative link will be added after the resource owner approves its destination.</p>
                 </div>
               </div>
               <button className="button button--disabled" disabled type="button">

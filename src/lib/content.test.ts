@@ -148,6 +148,6 @@ describe("search", () => {
 
     expect(onboarding?.meta).toBe("Onboarding");
     expect(onboarding?.href).toBe("/resources?focus=resource-013");
-    expect(placeholder?.meta).toContain("Sample resource");
+    expect(placeholder?.meta).toContain("Link pending approval");
   });
 });

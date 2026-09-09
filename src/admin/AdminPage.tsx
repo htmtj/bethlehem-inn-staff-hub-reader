@@ -332,7 +332,7 @@ export function AdminPage() {
 
   return (
     <div className="admin-shell">
-      <div className="admin-security-bar"><ShieldCheck aria-hidden="true" size={16} /> Secure publishing beta · Sample content only</div>
+      <div className="admin-security-bar"><ShieldCheck aria-hidden="true" size={16} /> Secure Staff Hub publishing</div>
       <header className="admin-header">
         <div className="admin-header__inner">
           <a aria-label="Bethlehem Inn Staff Hub Publishing" className="admin-brand" href="/admin">

@@ -43,7 +43,7 @@ export function NewsPage() {
         <div className="section-heading-row news-heading-row">
           <div>
             <h2 id="news-feed-heading">{showArchive ? "Archive / history" : importantOnly ? "Important news" : "Latest updates"}</h2>
-            <p>{showArchive ? "Expired and archived sample entries." : "Newest relevant items first."}</p>
+            <p>{showArchive ? "Expired and archived updates." : "Newest relevant items first."}</p>
           </div>
           <button className="button button--secondary" onClick={() => setShowArchive((value) => !value)} type="button">
             {showArchive ? "Return to active news" : "View archive"}

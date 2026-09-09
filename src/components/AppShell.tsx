@@ -6,7 +6,7 @@ import { SearchDialog } from "./SearchDialog";
 const navItems = [
   { label: "Home", href: "/" },
   { label: "News", href: "/news" },
-  { label: "Upcoming", href: "/upcoming" },
+  { label: "Calendar", href: "/upcoming" },
   { label: "Departments", href: "/departments" },
   { label: "Resources", href: "/resources" },
 ];
@@ -36,7 +36,6 @@ export function AppShell({ children }: PropsWithChildren) {
 
   return (
     <div className="site-shell">
-      <div aria-hidden={searchOpen} className="beta-bar" inert={searchOpen ? true : undefined}>Phase 1 beta · Sample content only</div>
       <header aria-hidden={searchOpen} className="site-header" inert={searchOpen ? true : undefined}>
         <div className="site-header__inner">
           <Link aria-label="Bethlehem Inn Staff Hub home" className="brand" to="/">
@@ -93,8 +92,7 @@ export function AppShell({ children }: PropsWithChildren) {
       <footer aria-hidden={searchOpen} className="site-footer" inert={searchOpen ? true : undefined}>
         <div className="page-width site-footer__inner">
           <img alt="Bethlehem Inn — shelter, help, hope" src="/brand/bi-wordmark.jpg" />
-          <p>Phase 1 beta · Sample content only</p>
-          <p>Reader experience proof — no confidential information.</p>
+          <p>Staff information, updates, and resources.</p>
         </div>
       </footer>
       <SearchDialog onClose={closeSearch} open={searchOpen} />

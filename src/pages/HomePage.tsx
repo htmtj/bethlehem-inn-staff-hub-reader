@@ -26,6 +26,7 @@ export function HomePage() {
   const latest = getActiveNews().filter((item) => !importantIds.has(item.id)).slice(0, 4);
   const { events: upcoming, state: calendarState } = useCalendarEvents();
   const quickResources = getActiveResources().filter((item) => item.featured).slice(0, 4);
+  const calendarMonth = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
 
   return (
     <>
@@ -112,11 +113,11 @@ export function HomePage() {
               <h2 id="upcoming-heading">Upcoming</h2>
               <CalendarDays aria-hidden="true" className="heading-icon" />
             </div>
-            <p className="feed-intro">Approved staff events and organizational dates.</p>
+            <p className="feed-intro">{calendarMonth} · Approved staff events and organizational dates.</p>
             {calendarState === "unavailable" ? <p className="feed-notice" role="status">Calendar refresh is temporarily unavailable; showing published Hub items.</p> : null}
             <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading"} />
             <Link className="text-link section-link" to="/upcoming">
-              View all upcoming <ArrowRight aria-hidden="true" size={18} />
+              View Calendar <ArrowRight aria-hidden="true" size={18} />
             </Link>
           </section>
         </div>
@@ -160,7 +161,7 @@ export function HomePage() {
               </span>
               <span>
                 <strong>{resource.title}</strong>
-                <small>{resource.category}{resource.destinationUrl ? "" : " · Sample resource"}</small>
+                <small>{resource.category}{resource.destinationUrl ? "" : " · Link pending approval"}</small>
               </span>
               <ArrowRight aria-hidden="true" size={20} />
             </Link>

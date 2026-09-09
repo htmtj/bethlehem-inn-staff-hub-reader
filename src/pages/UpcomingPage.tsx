@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
-import { UpcomingList } from "../components/UpcomingList";
 import { departments } from "../lib/content";
 import { useCalendarEvents } from "../hooks/useCalendarEvents";
+import { CalendarView } from "../components/CalendarView";
 
 export function UpcomingPage() {
   const [department, setDepartment] = useState("all");
@@ -22,7 +22,7 @@ export function UpcomingPage() {
       <header className="page-header page-header--icon">
         <span><CalendarDays aria-hidden="true" /></span>
         <div>
-          <h1>Upcoming</h1>
+          <h1>Calendar &amp; Upcoming</h1>
           <p>Meetings, trainings, deadlines, and organizational dates from the Staff Hub calendar.</p>
         </div>
       </header>
@@ -51,7 +51,7 @@ export function UpcomingPage() {
           </label>
         </div>
         <div className="upcoming-page-list">
-      <UpcomingList items={filtered} loading={state === "loading"} />
+          <CalendarView events={filtered} loading={state === "loading"} />
         </div>
       </section>
     </div>
