@@ -12,22 +12,22 @@ A dedicated staff-safe calendar was created for the eventual one-way feed:
 - Sharing: owner-only (not public); organization-wide availability is enabled with “See event details”
 - Current contents: empty; no Case Management records were copied
 
-This calendar is intentionally not yet connected to production. No public iCal or secret iCal address is used.
+The Staff Hub Calendar Function now targets this calendar only. No public iCal or secret iCal address is used.
 
 The current calendar contains Bend events as well as participant names, case-management titles, notes, and internal locations. The public Reader must never receive those raw records.
 
 ## Production architecture
 
-Use a Cloudflare Pages Function as the only Calendar reader. Prefer `https://www.googleapis.com/auth/calendar.events.readonly`, which is sufficient for event reads; use the broader `calendar.readonly` scope only if a demonstrated API requirement makes the narrower scope insufficient. Store a rotatable Google OAuth refresh token, OAuth client ID, and client secret as encrypted Production secrets. Never send an access token, refresh token, attendee list, organizer identity, attachment, Meet link, raw description, raw location, or Google event ID to the Reader.
+Use the `/api/calendar` Cloudflare Pages Function as the only Calendar reader. It uses a dedicated service identity with `https://www.googleapis.com/auth/calendar.events.readonly` and a direct reader ACL on the dedicated calendar. The service-account JSON is stored as the encrypted Production secret `GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON`; no access token, private key, attendee list, organizer identity, attachment, Meet link, raw description, raw location, or Google event ID is sent to the Reader.
 
 The existing Google Identity client is for sign-in and does not grant Calendar API access. Calendar authorization therefore needs a separate server-side delegated authorization, or an approved safe-calendar/proxy owned by Bethlehem Inn.
 
-Credential decision order:
+Credential decision record:
 
-1. Evaluate a dedicated Google service identity with a direct `reader` ACL on only the staff-safe calendar. Do not grant it Case Management access, writer/owner access, or domain-wide delegation.
-2. If that narrow ACL is not supported in the actual Workspace setup, use offline OAuth authorization for `jobs@bethleheminn.org` with the read-only event scope above. The refresh token is server-only and rotatable.
+1. Dedicated service identity selected and configured: `staff-hub-calendar-reader@clean-axiom-454114-m3.iam.gserviceaccount.com`, with no project IAM roles and direct “See event details” access only to this calendar.
+2. Offline OAuth remains a fallback only; it is not configured.
 
-Neither credential exists in the Staff Hub deployment yet. The browser Calendar connector session is not transferable as an application credential.
+The Google Calendar API is enabled in project `clean-axiom-454114-m3`. The browser Calendar connector session is not used as an application credential.
 
 ## Eligibility gate
 
@@ -36,20 +36,20 @@ Do not ingest the current mixed-use calendar until events have a deterministic s
 1. a dedicated curated Staff Hub / Staff Events calendar, or
 2. an explicit marker such as `STAFF_HUB_PUBLIC` maintained by an authorized calendar owner.
 
-The Function must reject every event without that signal. A Bend location or a keyword match is insufficient.
+The Function reads only the dedicated curated calendar, so calendar membership is the staff-safe signal. It never reads `casemanagement@bethleheminn.org`; a Bend location or keyword match is insufficient.
 
 ## Allowlist transformation
 
-For an eligible event, return only:
+For an eligible event, `/api/calendar` returns only:
 
 - staff-safe title supplied by the event owner
 - start and end time, including all-day handling
 - sanitized staff-safe location when explicitly approved
 - Staff Hub department/category from a controlled mapping
-- optional staff-facing description from a dedicated safe field
+- optional staff-facing description from the dedicated event
 
 Strip all other fields. Stable identity, duplicate detection, recurrence expansion, cancellation, expiry, and source timestamps remain server-side implementation details.
 
 ## Failure behavior
 
-Calendar reads are one-way and read-only. If authorization, the API, or the eligibility gate fails, the Reader keeps its existing Upcoming content and shows a neutral unavailable state. Logs contain status, operation, and error class only; never event text, participant data, or credentials.
+Calendar reads are one-way and read-only. If authorization or the API fails, the Reader keeps its existing Upcoming content and shows a neutral unavailable state. Logs contain status, operation, and error class only; never event text, participant data, or credentials.

@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
 import { UpcomingList } from "../components/UpcomingList";
-import { departments, getActiveEvents } from "../lib/content";
+import { departments } from "../lib/content";
+import { useCalendarEvents } from "../hooks/useCalendarEvents";
 
 export function UpcomingPage() {
   const [department, setDepartment] = useState("all");
   const [category, setCategory] = useState("all");
-  const active = getActiveEvents();
+  const { events: active, state } = useCalendarEvents();
   const categories = Array.from(new Set(active.map((item) => item.category))).sort();
   const filtered = useMemo(
     () => active.filter((item) =>
@@ -22,9 +23,12 @@ export function UpcomingPage() {
         <span><CalendarDays aria-hidden="true" /></span>
         <div>
           <h1>Upcoming</h1>
-          <p>Sample meetings, trainings, deadlines, and organizational dates. Calendar integration is intentionally deferred.</p>
+          <p>Meetings, trainings, deadlines, and organizational dates from the Staff Hub calendar.</p>
         </div>
       </header>
+      {state === "unavailable" ? (
+        <p className="feed-notice" role="status">Calendar refresh is temporarily unavailable; showing published Hub items.</p>
+      ) : null}
       <section aria-labelledby="upcoming-list-heading">
         <div className="section-heading-row">
           <h2 id="upcoming-list-heading">Coming up</h2>

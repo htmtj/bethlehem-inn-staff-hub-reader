@@ -1439,6 +1439,12 @@ select {
   text-align: center;
 }
 
+.feed-notice {
+  margin: -0.75rem 0 1.25rem;
+  color: var(--ink-muted);
+  font-size: 0.9rem;
+}
+
 .empty-state svg {
   margin-bottom: 12px;
   color: var(--line-strong);

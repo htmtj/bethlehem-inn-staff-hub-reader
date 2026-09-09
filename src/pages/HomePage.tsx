@@ -8,10 +8,10 @@ import { Link } from "react-router-dom";
 import { DepartmentIcon, ResourceIcon } from "../components/ContentIcons";
 import { NewsList } from "../components/NewsList";
 import { UpcomingList } from "../components/UpcomingList";
+import { useCalendarEvents } from "../hooks/useCalendarEvents";
 import {
   departments,
   formatShortDate,
-  getActiveEvents,
   getActiveNews,
   getActiveResources,
   getDepartmentName,
@@ -24,7 +24,7 @@ export function HomePage() {
   const secondary = important.slice(1);
   const importantIds = new Set(important.map((item) => item.id));
   const latest = getActiveNews().filter((item) => !importantIds.has(item.id)).slice(0, 4);
-  const upcoming = getActiveEvents();
+  const { events: upcoming } = useCalendarEvents();
   const quickResources = getActiveResources().filter((item) => item.featured).slice(0, 4);
 
   return (
