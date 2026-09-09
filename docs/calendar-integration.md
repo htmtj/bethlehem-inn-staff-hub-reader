@@ -18,9 +18,16 @@ The current calendar contains Bend events as well as participant names, case-man
 
 ## Production architecture
 
-Use a Cloudflare Pages Function as the only Calendar reader. Store a rotatable Google OAuth refresh token, OAuth client ID, and client secret as encrypted Production secrets. Request only `https://www.googleapis.com/auth/calendar.readonly`. Never send an access token, refresh token, attendee list, organizer identity, attachment, Meet link, raw description, raw location, or Google event ID to the Reader.
+Use a Cloudflare Pages Function as the only Calendar reader. Prefer `https://www.googleapis.com/auth/calendar.events.readonly`, which is sufficient for event reads; use the broader `calendar.readonly` scope only if a demonstrated API requirement makes the narrower scope insufficient. Store a rotatable Google OAuth refresh token, OAuth client ID, and client secret as encrypted Production secrets. Never send an access token, refresh token, attendee list, organizer identity, attachment, Meet link, raw description, raw location, or Google event ID to the Reader.
 
 The existing Google Identity client is for sign-in and does not grant Calendar API access. Calendar authorization therefore needs a separate server-side delegated authorization, or an approved safe-calendar/proxy owned by Bethlehem Inn.
+
+Credential decision order:
+
+1. Evaluate a dedicated Google service identity with a direct `reader` ACL on only the staff-safe calendar. Do not grant it Case Management access, writer/owner access, or domain-wide delegation.
+2. If that narrow ACL is not supported in the actual Workspace setup, use offline OAuth authorization for `jobs@bethleheminn.org` with the read-only event scope above. The refresh token is server-only and rotatable.
+
+Neither credential exists in the Staff Hub deployment yet. The browser Calendar connector session is not transferable as an application credential.
 
 ## Eligibility gate
 
