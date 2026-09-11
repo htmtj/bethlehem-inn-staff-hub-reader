@@ -1,5 +1,30 @@
 [
   {
+    "id": "news-9d84c307-0ac7-47e1-881a-8c3e88723b87",
+    "slug": "test-9d84c307",
+    "title": "Test",
+    "summary": "Test",
+    "body": [
+      "TEsting"
+    ],
+    "department": "kitchen",
+    "category": "Department update",
+    "publishedAt": "2026-09-11T19:56:52.254Z",
+    "effectiveAt": "2026-09-11T19:56:00.000Z",
+    "expiresAt": "2026-09-11T19:56:00.000Z",
+    "status": "published",
+    "priority": "high",
+    "pinned": false,
+    "actionNeeded": false,
+    "actionText": null,
+    "contact": "Kenny",
+    "resourceLinks": [],
+    "image": null,
+    "imageAlt": null,
+    "createdAt": "2026-09-11T19:56:53.135Z",
+    "updatedAt": "2026-09-11T19:56:53.135Z"
+  },
+  {
     "id": "news-33105886-7e75-4155-8687-a06ea0174a1a",
     "slug": "qa-publisher-persistence-check-33105886",
     "title": "QA — Publisher persistence check",
