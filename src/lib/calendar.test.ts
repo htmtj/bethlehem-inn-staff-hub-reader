@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { mergeEvents } from "./calendar";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { loadCalendarFeed, mergeEvents } from "./calendar";
+afterEach(() => vi.unstubAllGlobals());
 import type { EventItem } from "../types/content";
 
 const event = (id: string, startAt: string): EventItem => ({
@@ -17,6 +18,14 @@ const event = (id: string, startAt: string): EventItem => ({
 });
 
 describe("Calendar event merge", () => {
+  it("does not interpret a failed or malformed feed as a successful empty calendar", async () => {
+    for (const payload of [{}, { events: [], source: "unavailable" }]) {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(payload)));
+      await expect(loadCalendarFeed()).rejects.toThrow();
+    }
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ events: [], source: "calendar" })));
+    await expect(loadCalendarFeed()).resolves.toMatchObject({ events: [] });
+  });
   it("deduplicates by stable event ID and keeps chronological order", () => {
     const merged = mergeEvents(
       [event("sample", "2026-10-02T09:00:00Z")],

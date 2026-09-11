@@ -4,9 +4,9 @@ import { DepartmentIcon } from "../components/ContentIcons";
 import { NewsList } from "../components/NewsList";
 import { ResourceList } from "../components/ResourceList";
 import { UpcomingList } from "../components/UpcomingList";
+import { useCalendarEvents } from "../hooks/useCalendarEvents";
 import {
   formatDate,
-  getActiveEvents,
   getActiveNews,
   getActiveResources,
   getDepartment,
@@ -15,13 +15,14 @@ import { NotFoundPage } from "./NotFoundPage";
 
 export function DepartmentPage() {
   const { departmentId } = useParams();
+  const { events, state } = useCalendarEvents();
   const department = getDepartment(departmentId);
   if (!department) return <NotFoundPage />;
 
   const departmentNews = getActiveNews().filter((item) => item.department === department.id);
   const important = departmentNews.find((item) => item.priority !== "standard" || item.actionNeeded);
   const remainingNews = departmentNews.filter((item) => item.id !== important?.id);
-  const departmentEvents = getActiveEvents().filter((item) => item.department === department.id);
+  const departmentEvents = events.filter((item) => item.department === department.id);
   const departmentResources = getActiveResources().filter((item) => item.department === department.id);
 
   return (
@@ -71,7 +72,8 @@ export function DepartmentPage() {
         <aside className="department-sidebar">
           <section aria-labelledby="department-upcoming-heading">
             <h2 id="department-upcoming-heading">Upcoming for {department.name}</h2>
-            <UpcomingList items={departmentEvents} />
+            {state === "unavailable" ? <p className="feed-notice" role="status">Calendar is temporarily unavailable. Hub-authored items, if any, remain below.</p> : null}
+            <UpcomingList items={departmentEvents} loading={state === "loading"} />
             <Link className="text-link section-link" to="/upcoming">View all upcoming <ArrowRight aria-hidden="true" size={18} /></Link>
           </section>
           <section aria-labelledby="department-resources-heading">

@@ -1,6 +1,7 @@
 [
   {
     "id": "event-001",
+    "sample": true,
     "title": "All-staff meeting",
     "startAt": "2026-08-26T10:00:00-07:00",
     "endAt": "2026-08-26T11:00:00-07:00",
@@ -14,6 +15,7 @@
   },
   {
     "id": "event-002",
+    "sample": true,
     "title": "Food-handler refresher",
     "startAt": "2026-09-02T13:00:00-07:00",
     "endAt": "2026-09-02T14:30:00-07:00",
@@ -27,6 +29,7 @@
   },
   {
     "id": "event-003",
+    "sample": true,
     "title": "Annual emergency drill",
     "startAt": "2026-09-03T09:00:00-07:00",
     "endAt": "2026-09-03T11:00:00-07:00",
@@ -40,6 +43,7 @@
   },
   {
     "id": "event-004",
+    "sample": true,
     "title": "North entrance work begins",
     "startAt": "2026-09-08T07:00:00-07:00",
     "endAt": null,
@@ -53,6 +57,7 @@
   },
   {
     "id": "event-005",
+    "sample": true,
     "title": "Programs team meeting",
     "startAt": "2026-09-10T09:00:00-07:00",
     "endAt": "2026-09-10T10:00:00-07:00",
@@ -66,6 +71,7 @@
   },
   {
     "id": "event-006",
+    "sample": true,
     "title": "Quarterly impact briefing",
     "startAt": "2026-09-15T09:00:00-07:00",
     "endAt": "2026-09-15T10:00:00-07:00",
@@ -79,6 +85,7 @@
   },
   {
     "id": "event-007",
+    "sample": true,
     "title": "Kitchen delivery window review",
     "startAt": "2026-09-17T14:00:00-07:00",
     "endAt": "2026-09-17T14:30:00-07:00",

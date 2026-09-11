@@ -32,6 +32,8 @@ export type NewsItem = {
 };
 
 export type EventItem = {
+  sample?: boolean;
+  allDay?: boolean;
   id: string;
   title: string;
   startAt: string;

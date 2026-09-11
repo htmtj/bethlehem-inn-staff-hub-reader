@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { getDepartmentName } from "../lib/content";
 import type { ContentStatus } from "../types/content";
 import type { AdminActor, AdminContentType, ManagedContent } from "./types";
+import { publishingIntent } from "./publishingIntent";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 
 type EditorValue = {
   id: string;
@@ -151,6 +153,7 @@ function typeLabel(contentType: AdminContentType): string {
 export function AdminEditor({ actor, contentType, editing, error, onCancel, onSave, saving }: Props) {
   const [value, setValue] = useState(() => valueFromContent(editing, contentType, actor));
   const [previewOpen, setPreviewOpen] = useState(false);
+  const previewRef = useDialogFocus(previewOpen);
 
   useEffect(() => {
     setValue(valueFromContent(editing, contentType, actor));
@@ -168,7 +171,8 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
 
   const isAdmin = actor.role === "admin";
   const isEdPublisher = actor.role === "ed_publisher";
-  const submitLabel = value.status === "scheduled" ? "Schedule" : "Publish now";
+  const intent = publishingIntent(value.status);
+  const submitLabel = intent.label;
   const previewBody = useMemo(() => value.details.split(/\n\s*\n/).filter(Boolean), [value.details]);
 
   const change = <K extends keyof EditorValue>(key: K, next: EditorValue[K]) => {
@@ -245,6 +249,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
       </div>
 
       {error ? <p className="admin-message admin-message--error" role="alert">{error}</p> : null}
+      <p className="admin-message">{value.status === "draft" ? "Save Draft keeps this item out of Reader views." : value.status === "scheduled" ? "This item becomes visible after the selected publish time and a successful site deployment." : "Publishing updates the public, no-login Reader after the site deploys."} Include only information approved for public display. Dates use your device’s local timezone.</p>
       {isEdPublisher ? <p className="admin-message">Published messages appear in News, Latest Updates, search, and Administration. Important priority may also place a message in Important News. The Reader is public: include only information approved for public display.</p> : null}
 
       <form className="admin-form" onSubmit={(event) => event.preventDefault()}>
@@ -446,24 +451,24 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
           <button className="button button--secondary" onClick={() => setPreviewOpen(true)} type="button">
             <Eye aria-hidden="true" size={18} /> Preview as Staff Will See It
           </button>
-          <button className="button button--secondary" disabled={saving || !value.title.trim()} onClick={() => void save("draft")} type="button">
+          {value.status !== "draft" ? <button className="button button--secondary" disabled={saving || !value.title.trim()} onClick={() => void save("draft")} type="button">
             <Save aria-hidden="true" size={18} /> Save Draft
-          </button>
+          </button> : null}
           <button
             className="button button--primary"
             disabled={saving || !value.title.trim() || (value.status === "scheduled" && !value.publishedAt)}
-            onClick={() => void save(value.status === "scheduled" ? "scheduled" : "published")}
+            onClick={() => void save(intent.status)}
             type="button"
           >
             {value.status === "scheduled" ? <CalendarDays aria-hidden="true" size={18} /> : <Send aria-hidden="true" size={18} />}
-            {saving ? "Publishing…" : submitLabel}
+            {saving ? "Saving…" : submitLabel}
           </button>
         </div>
       </form>
 
       {previewOpen ? (
         <div className="admin-preview-backdrop" role="presentation">
-          <section aria-labelledby="preview-heading" aria-modal="true" className="admin-preview" role="dialog">
+          <section ref={previewRef} aria-labelledby="preview-heading" aria-modal="true" className="admin-preview" role="dialog">
             <div className="admin-preview__heading">
               <div>
                 <span>Staff view preview</span>
@@ -498,17 +503,17 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
             )}
             <div className="admin-preview__footer">
               <button className="button button--secondary" onClick={() => setPreviewOpen(false)} type="button">Back to Edit</button>
-              <button className="button button--secondary" disabled={saving || !value.title.trim()} onClick={() => void save("draft")} type="button">
+              {value.status !== "draft" ? <button className="button button--secondary" disabled={saving || !value.title.trim()} onClick={() => void save("draft")} type="button">
                 <Save aria-hidden="true" size={18} /> Save Draft
-              </button>
+              </button> : null}
               <button
                 className="button button--primary"
                 disabled={saving || !value.title.trim() || (value.status === "scheduled" && !value.publishedAt)}
-                onClick={() => void save(value.status === "scheduled" ? "scheduled" : "published")}
+                onClick={() => void save(intent.status)}
                 type="button"
               >
                 {value.status === "scheduled" ? <CalendarDays aria-hidden="true" size={18} /> : <Send aria-hidden="true" size={18} />}
-                {saving ? "Publishing…" : value.status === "scheduled" ? "Schedule" : "Publish now"}
+                {saving ? "Saving…" : submitLabel}
               </button>
             </div>
           </section>

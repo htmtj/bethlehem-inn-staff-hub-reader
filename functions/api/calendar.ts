@@ -1,3 +1,5 @@
+import { calendarRange, type CalendarRange } from "../../src/lib/eventDates";
+
 type CalendarEnv = {
   GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON?: string;
 };
@@ -18,6 +20,7 @@ type GoogleCalendarEvent = {
 };
 
 type EventItem = {
+  allDay: boolean;
   id: string;
   title: string;
   startAt: string;
@@ -79,7 +82,7 @@ async function serviceAccountAccessToken(secret: string): Promise<string> {
   const claim = base64Url(JSON.stringify({
     iss: credentials.client_email,
     scope: CALENDAR_SCOPE,
-    aud: typeof credentials.token_uri === "string" ? credentials.token_uri : TOKEN_ENDPOINT,
+    aud: TOKEN_ENDPOINT,
     iat: issuedAt,
     exp: issuedAt + 3600,
   }));
@@ -97,7 +100,8 @@ async function serviceAccountAccessToken(secret: string): Promise<string> {
     new TextEncoder().encode(unsignedToken),
   );
 
-  const tokenResponse = await fetch(typeof credentials.token_uri === "string" ? credentials.token_uri : TOKEN_ENDPOINT, {
+  const tokenResponse = await fetch(TOKEN_ENDPOINT, {
+    signal: AbortSignal.timeout(8000),
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -120,7 +124,7 @@ function cleanText(value: unknown, maxLength: number): string {
 
 function calendarDate(value: unknown): string | null {
   if (typeof value !== "string") return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00:00.000Z`;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return Number.isFinite(Date.parse(value)) && new Date(value).toISOString().startsWith(value) ? value : null;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
 }
@@ -133,12 +137,15 @@ export function normalizeCalendarEvents(
     if (item.status === "cancelled" || typeof item.id !== "string") return [];
     const startAt = calendarDate(item.start?.dateTime ?? item.start?.date);
     if (!startAt) return [];
-    const endAt = item.end?.dateTime ? calendarDate(item.end.dateTime) : null;
+    const allDay = !item.start?.dateTime && typeof item.start?.date === "string";
+    const endAt = calendarDate(allDay ? item.end?.date : item.end?.dateTime);
+    if (endAt && endAt <= startAt) return [];
     const title = cleanText(item.summary, 200) || "Staff Hub event";
     const description = cleanText(item.description, 1000);
     const location = cleanText(item.location, 200) || "Bethlehem Inn";
     return [{
       id: `calendar-${item.id}`,
+      allDay,
       title,
       startAt,
       endAt,
@@ -155,32 +162,51 @@ export function normalizeCalendarEvents(
   });
 }
 
-async function fetchCalendarEvents(secret: string): Promise<EventItem[]> {
+export async function fetchCalendarPages(accessToken: string, range: CalendarRange): Promise<EventItem[]> {
+  const signal = AbortSignal.timeout(15000);
+  // Pad UTC month boundaries by one day; display filtering uses Pacific calendar dates.
+  const params = new URLSearchParams({ singleEvents: "true", orderBy: "startTime", showDeleted: "false", timeZone: "America/Los_Angeles",
+    timeMin: new Date(Date.parse(range.start) - 86400000).toISOString(),
+    timeMax: new Date(Date.parse(range.end) + 86400000).toISOString(),
+    maxResults: "250", fields: "nextPageToken,items(id,summary,description,location,status,start,end)" });
+  const events = new Map<string, EventItem>();
+  const seenPages = new Set<string>();
+  for (let page = 0; page < 20; page += 1) {
+    const response = await fetch(`${CALENDAR_ENDPOINT}/${encodeURIComponent(STAFF_HUB_CALENDAR_ID)}/events?${params}`, {
+      headers: { Authorization: `Bearer ${accessToken}` }, signal,
+    });
+    if (!response.ok) throw new Error("Calendar upstream failure");
+    const payload = await response.json() as { items?: unknown; nextPageToken?: unknown };
+    if (payload.items !== undefined && !Array.isArray(payload.items)) throw new Error("Invalid Calendar response");
+    for (const event of normalizeCalendarEvents((payload.items ?? []) as GoogleCalendarEvent[])) events.set(event.id, event);
+    if (!payload.nextPageToken) {
+      // Stable opaque public IDs, not Google's source record IDs.
+      return Promise.all([...events.values()].map(async (event) => {
+        const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(event.id));
+        return { ...event, id: `calendar-${Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")}` };
+      }));
+    }
+    if (typeof payload.nextPageToken !== "string" || seenPages.has(payload.nextPageToken)) throw new Error("Invalid Calendar pagination");
+    seenPages.add(payload.nextPageToken);
+    params.set("pageToken", payload.nextPageToken);
+  }
+  throw new Error("Calendar page limit exceeded");
+}
+
+async function fetchCalendarEvents(secret: string, range: CalendarRange): Promise<EventItem[]> {
   const accessToken = await serviceAccountAccessToken(secret);
-  const params = new URLSearchParams({
-    singleEvents: "true",
-    orderBy: "startTime",
-    timeMin: new Date().toISOString(),
-    maxResults: "50",
-    fields: "items(id,summary,description,location,status,start,end)",
-  });
-  const response = await fetch(
-    `${CALENDAR_ENDPOINT}/${encodeURIComponent(STAFF_HUB_CALENDAR_ID)}/events?${params.toString()}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  );
-  if (!response.ok) throw new Error(`Calendar event request failed (${response.status})`);
-  const payload = await response.json() as { items?: unknown };
-  return normalizeCalendarEvents(Array.isArray(payload.items) ? payload.items as GoogleCalendarEvent[] : []);
+  return fetchCalendarPages(accessToken, range);
 }
 
 export async function onRequestGet(context: CalendarContext): Promise<Response> {
   const secret = context.env.GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON?.trim();
   if (!secret) return json({ events: [], source: "unavailable" }, 503);
   try {
-    const events = await fetchCalendarEvents(secret);
-    return json({ events, source: "calendar" });
+    const range = calendarRange();
+    const events = await fetchCalendarEvents(secret, range);
+    return json({ events, source: "calendar", range, fetchedAt: new Date().toISOString() });
   } catch (error) {
-    console.error("Staff Hub Calendar feed unavailable", error instanceof Error ? error.message : "Unknown error");
+    console.error("Staff Hub Calendar feed unavailable");
     return json({ events: [], source: "unavailable" }, 503);
   }
 }

@@ -10,11 +10,11 @@ A dedicated staff-safe calendar was created for the eventual one-way feed:
 - Calendar ID: `c_9ebfb87e322a0337c45664a545ed09ab877983d3fd73dbceaf8af5f76b270122@group.calendar.google.com`
 - Owner: `jobs@bethleheminn.org`
 - Sharing: owner-only (not public); organization-wide availability is enabled with “See event details”
-- Current contents: empty; no Case Management records were copied
+- Current contents: empty (verified through March 2027); no Case Management records were copied
 
 The Staff Hub Calendar Function now targets this calendar only. No public iCal or secret iCal address is used.
 
-The current calendar contains Bend events as well as participant names, case-management titles, notes, and internal locations. The public Reader must never receive those raw records.
+The current calendar is intentionally empty. The public Reader must never receive raw mixed-use Case Management records.
 
 ## Production architecture
 
@@ -36,7 +36,7 @@ Do not ingest the current mixed-use calendar until events have a deterministic s
 1. a dedicated curated Staff Hub / Staff Events calendar, or
 2. an explicit marker such as `STAFF_HUB_PUBLIC` maintained by an authorized calendar owner.
 
-The Function reads only the dedicated curated calendar, so calendar membership is the staff-safe signal. It never reads `casemanagement@bethleheminn.org`; a Bend location or keyword match is insufficient.
+The Function reads only the dedicated curated calendar, so calendar membership is the staff-safe signal. It never reads `casemanagement@bethleheminn.org`; a Bend location or keyword match is insufficient. An empty response is valid and never triggers a sample-event fallback.
 
 ## Allowlist transformation
 
@@ -48,8 +48,12 @@ For an eligible event, `/api/calendar` returns only:
 - Staff Hub department/category from a controlled mapping
 - optional staff-facing description from the dedicated event
 
-Strip all other fields. Stable identity, duplicate detection, recurrence expansion, cancellation, expiry, and source timestamps remain server-side implementation details.
+Strip all other fields. Stable hashed identity, duplicate detection, recurrence expansion, cancellation, expiry, and source timestamps remain server-side implementation details. Reads use a bounded rolling range, follow every Calendar API page, and preserve all-day exclusive end dates. Reader times render in `America/Los_Angeles`.
 
 ## Failure behavior
 
-Calendar reads are one-way and read-only. If authorization or the API fails, the Reader keeps its existing Upcoming content and shows a neutral unavailable state. Logs contain status, operation, and error class only; never event text, participant data, or credentials.
+Calendar reads are one-way and read-only. If authorization or the API fails, the Reader shows a neutral unavailable state and does not inject sample Calendar events. Logs contain only a generic operation message; never event text, participant data, or credentials.
+
+## Source decision required
+
+The dedicated calendar is the safe current source but has no events, so Upcoming is intentionally empty. To supply useful organizational dates, an authorized owner must either add approved staff-safe events to `Bethlehem Inn Staff Hub Events` or approve a controlled synchronization that copies only explicitly marked, non-confidential events from Case Management. Adding approved events to the dedicated calendar is recommended: it preserves privacy, ownership, and the current least-privilege API. No source change or Case Management ingestion is implemented here.

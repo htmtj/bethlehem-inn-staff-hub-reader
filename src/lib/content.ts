@@ -2,6 +2,7 @@ import departmentsJson from "../content/departments.json";
 import eventsJson from "../content/events.json";
 import newsJson from "../content/news.json";
 import resourcesJson from "../content/resources.json";
+import { hubDateKey } from "./eventDates";
 import type {
   Department,
   EventItem,
@@ -93,7 +94,7 @@ export function getDepartmentName(id: string): string {
   return getDepartment(id)?.displayName ?? "Organization-wide";
 }
 
-export function searchHub(query: string, now = new Date()): SearchResult[] {
+export function searchHub(query: string, now = new Date(), calendarEvents?: EventItem[]): SearchResult[] {
   const normalized = query.trim().toLocaleLowerCase();
   if (!normalized) return [];
 
@@ -119,7 +120,7 @@ export function searchHub(query: string, now = new Date()): SearchResult[] {
       href: `/news/${item.slug}`,
     }));
 
-  const eventResults: SearchResult[] = getActiveEvents(now)
+  const eventResults: SearchResult[] = (calendarEvents ?? getActiveEvents(now))
     .filter((item) =>
       matches([
         item.title,
@@ -135,7 +136,7 @@ export function searchHub(query: string, now = new Date()): SearchResult[] {
       title: item.title,
       description: item.description,
       meta: `${getDepartmentName(item.department)} · ${item.location}`,
-      href: "/upcoming",
+      href: `/upcoming?date=${hubDateKey(item.startAt)}`,
     }));
 
   const departmentResults: SearchResult[] = departments
@@ -151,7 +152,7 @@ export function searchHub(query: string, now = new Date()): SearchResult[] {
       href: `/departments/${department.id}`,
     }));
 
-  const resourceResults: SearchResult[] = getActiveResources()
+  const resourceResults: SearchResult[] = getActiveResources(now)
     .filter((item) =>
       matches([
         item.title,

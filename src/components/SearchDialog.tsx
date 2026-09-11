@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { searchHub } from "../lib/content";
+import { useDialogFocus } from "../hooks/useDialogFocus";
+import { useCalendarEvents } from "../hooks/useCalendarEvents";
 
 type SearchDialogProps = {
   open: boolean;
@@ -11,7 +13,9 @@ type SearchDialogProps = {
 export function SearchDialog({ open, onClose }: SearchDialogProps) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const results = useMemo(() => searchHub(query), [query]);
+  const dialogRef = useDialogFocus(open);
+  const { events, state } = useCalendarEvents(open);
+  const results = useMemo(() => searchHub(query, new Date(), events), [query, events]);
 
   useEffect(() => {
     if (!open) return;
@@ -33,6 +37,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   return (
     <div className="dialog-backdrop" role="presentation" onMouseDown={onClose}>
       <section
+        ref={dialogRef}
         aria-label="Search the Staff Hub"
         aria-modal="true"
         className="search-dialog"
@@ -61,6 +66,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           />
         </label>
         <div aria-live="polite" className="search-results">
+          {state === "unavailable" ? <p className="feed-notice">Calendar search is temporarily unavailable. News, departments, and resources are still searchable.</p> : null}
           {!query.trim() ? (
             <p className="search-prompt">Start typing to search current Staff Hub content.</p>
           ) : results.length ? (

@@ -312,6 +312,35 @@ p {
   padding-block: 58px;
 }
 
+.staff-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-block: 18px;
+}
+
+.staff-quick-actions a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--teal-050);
+  color: var(--teal-900);
+  font-weight: 750;
+  text-decoration: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.staff-quick-actions a:hover,
+.staff-quick-actions a:focus-visible {
+  border-color: var(--teal-600);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
 .section-band {
   padding-block: 48px;
   border-block: 1px solid #e1ebed;
@@ -833,6 +862,12 @@ p {
   color: var(--muted);
   font-size: 0.76rem;
   gap: 7px;
+}
+
+.calendar-range {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: .75rem;
 }
 
 .calendar-legend .calendar-day__dot {
@@ -3425,6 +3460,10 @@ select {
 }
 
 @media (max-width: 560px) {
+  .staff-quick-actions {
+    grid-template-columns: 1fr;
+    padding-block: 12px;
+  }
   .admin-security-bar {
     justify-content: start;
     font-size: 0.7rem;

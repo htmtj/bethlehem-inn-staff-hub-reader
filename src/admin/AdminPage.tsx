@@ -16,6 +16,7 @@ import { getDepartmentName } from "../lib/content";
 import type { ContentStatus, EventItem, NewsItem, ResourceItem } from "../types/content";
 import { loadAdminBootstrap, mutateContent } from "./api";
 import { AdminEditor } from "./AdminEditor";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 import type {
   AdminActor,
   AdminContent,
@@ -120,9 +121,10 @@ function updateLocalContent(
 }
 
 function PreviewDialog({ managed, onClose }: { managed: ManagedContent; onClose: () => void }) {
+  const dialogRef = useDialogFocus(true);
   return (
     <div className="admin-preview-backdrop" role="presentation">
-      <section aria-labelledby="row-preview-heading" aria-modal="true" className="admin-preview" role="dialog">
+      <section ref={dialogRef} aria-labelledby="row-preview-heading" aria-modal="true" className="admin-preview" role="dialog">
         <div className="admin-preview__heading">
           <div>
             <span>Staff view preview</span>
@@ -175,6 +177,7 @@ export function AdminPage() {
   const [editing, setEditing] = useState<ManagedContent | null>(null);
   const [previewing, setPreviewing] = useState<ManagedContent | null>(null);
   const [archiving, setArchiving] = useState<ManagedContent | null>(null);
+  const archiveRef = useDialogFocus(Boolean(archiving));
   const [saving, setSaving] = useState(false);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -371,14 +374,13 @@ export function AdminPage() {
         <section aria-labelledby="content-heading" className="admin-content-panel">
           <h2 className="sr-only" id="content-heading">Staff Hub content</h2>
           <div className="admin-content-toolbar">
-            <div aria-label="Content status" className="admin-status-tabs" role="tablist">
+            <div aria-label="Content status" className="admin-status-tabs" role="group">
               {statusTabs.map((tab) => (
                 <button
-                  aria-selected={status === tab.value}
+                  aria-pressed={status === tab.value}
                   className={status === tab.value ? "is-active" : ""}
                   key={tab.value}
                   onClick={() => setStatus(tab.value)}
-                  role="tab"
                   type="button"
                 >
                   {tab.label} <span>{counts[tab.value]}</span>
@@ -475,7 +477,7 @@ export function AdminPage() {
 
       {archiving ? (
         <div className="admin-preview-backdrop" role="presentation">
-          <section aria-labelledby="archive-heading" aria-modal="true" className="admin-confirm" role="dialog">
+          <section ref={archiveRef} aria-labelledby="archive-heading" aria-modal="true" className="admin-confirm" role="dialog">
             <Archive aria-hidden="true" />
             <h2 id="archive-heading">Archive “{archiving.item.title}”?</h2>
             <p>This removes the item from active Staff Hub views but keeps it in history.</p>

@@ -7,7 +7,7 @@ import { CalendarView } from "../components/CalendarView";
 export function UpcomingPage() {
   const [department, setDepartment] = useState("all");
   const [category, setCategory] = useState("all");
-  const { events: active, state } = useCalendarEvents();
+  const { events: active, state, range, refresh } = useCalendarEvents();
   const categories = Array.from(new Set(active.map((item) => item.category))).sort();
   const filtered = useMemo(
     () => active.filter((item) =>
@@ -27,14 +27,14 @@ export function UpcomingPage() {
         </div>
       </header>
       {state === "unavailable" ? (
-        <p className="feed-notice" role="status">Calendar refresh is temporarily unavailable; showing published Hub items.</p>
+        <p className="feed-notice" role="status">Calendar is unavailable. No replacement or sample events are shown.</p>
       ) : null}
       <section aria-labelledby="upcoming-list-heading">
         <div className="section-heading-row">
-          <h2 id="upcoming-list-heading">Coming up</h2>
-          <p className="result-count">{filtered.length} item{filtered.length === 1 ? "" : "s"}</p>
+          <h2 id="upcoming-list-heading">Staff events</h2>
+          <button className="button button--secondary" disabled={state === "loading"} onClick={refresh} type="button">{state === "loading" ? "Refreshing…" : "Refresh calendar"}</button>
         </div>
-        <div className="filter-bar filter-bar--selects">
+        {active.length > 0 ? <div className="filter-bar filter-bar--selects">
           <label>
             <span>Department</span>
             <select onChange={(event) => setDepartment(event.target.value)} value={department}>
@@ -49,9 +49,9 @@ export function UpcomingPage() {
               {categories.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
-        </div>
+        </div> : null}
         <div className="upcoming-page-list">
-          <CalendarView events={filtered} loading={state === "loading"} />
+          <CalendarView events={filtered} loading={state === "loading"} unavailable={state === "unavailable"} range={range} />
         </div>
       </section>
     </div>

@@ -1,9 +1,11 @@
 import { CalendarDays, MapPin } from "lucide-react";
-import { formatTimeRange, getDateParts, getDepartmentName } from "../lib/content";
+import { getDepartmentName } from "../lib/content";
+import { formatEventDate, formatEventTime, hubDateKey } from "../lib/eventDates";
 import type { EventItem } from "../types/content";
 
 export function UpcomingList({ items, limit, loading = false }: { items: EventItem[]; limit?: number; loading?: boolean }) {
-  const visibleItems = typeof limit === "number" ? items.slice(0, limit) : items;
+  const upcoming = items.filter((item) => hubDateKey(item.endAt ?? item.startAt) >= hubDateKey(new Date()));
+  const visibleItems = typeof limit === "number" ? upcoming.slice(0, limit) : upcoming;
 
   if (loading || !visibleItems.length) {
     return (
@@ -18,7 +20,7 @@ export function UpcomingList({ items, limit, loading = false }: { items: EventIt
   return (
     <ol className="upcoming-list">
       {visibleItems.map((item) => {
-        const date = getDateParts(item.startAt);
+        const date = { month: formatEventDate(item.startAt, { month: "short" }), day: formatEventDate(item.startAt, { day: "2-digit" }) };
         return (
           <li key={item.id}>
             <time className="date-block" dateTime={item.startAt}>
@@ -27,7 +29,7 @@ export function UpcomingList({ items, limit, loading = false }: { items: EventIt
             </time>
             <div>
               <strong>{item.title}</strong>
-              <span>{formatTimeRange(item.startAt, item.endAt)}</span>
+              <span>{formatEventTime(item)}</span>
               <span className="location-line">
                 <MapPin aria-hidden="true" size={14} /> {item.location}
               </span>

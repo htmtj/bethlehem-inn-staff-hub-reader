@@ -94,6 +94,12 @@ export function HomePage() {
         )}
       </section>
 
+      <nav className="page-width staff-quick-actions" aria-label="Quick staff actions">
+        <a href="https://bionboarding.netlify.app" target="_blank" rel="noopener noreferrer">Onboarding &amp; Training <ArrowRight aria-hidden="true" size={18} /><span className="sr-only"> (opens in a new tab)</span></a>
+        <Link to="/resources">Find a resource <ArrowRight aria-hidden="true" size={18} /></Link>
+        <Link to="/upcoming">Check the calendar <CalendarDays aria-hidden="true" size={18} /></Link>
+      </nav>
+
       <section className="section-band">
         <div className="page-width home-feed-grid">
           <section aria-labelledby="latest-heading">
@@ -114,8 +120,7 @@ export function HomePage() {
               <CalendarDays aria-hidden="true" className="heading-icon" />
             </div>
             <p className="feed-intro">{calendarMonth} · Approved staff events and organizational dates.</p>
-            {calendarState === "unavailable" ? <p className="feed-notice" role="status">Calendar refresh is temporarily unavailable; showing published Hub items.</p> : null}
-            <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading"} />
+            {calendarState === "unavailable" ? <p className="feed-notice" role="status">Calendar is temporarily unavailable. Open Calendar to retry.</p> : <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading"} />}
             <Link className="text-link section-link" to="/upcoming">
               View Calendar <ArrowRight aria-hidden="true" size={18} />
             </Link>
