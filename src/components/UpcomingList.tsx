@@ -30,9 +30,9 @@ export function UpcomingList({ items, limit, loading = false }: { items: EventIt
             <div>
               <strong>{item.title}</strong>
               <span>{formatEventTime(item)}</span>
-              <span className="location-line">
+              {item.location ? <span className="location-line">
                 <MapPin aria-hidden="true" size={14} /> {item.location}
-              </span>
+              </span> : null}
               <small>{getDepartmentName(item.department)}</small>
             </div>
           </li>

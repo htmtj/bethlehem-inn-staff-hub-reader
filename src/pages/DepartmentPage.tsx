@@ -73,6 +73,7 @@ export function DepartmentPage() {
           <section aria-labelledby="department-upcoming-heading">
             <h2 id="department-upcoming-heading">Upcoming for {department.name}</h2>
             {state === "unavailable" ? <p className="feed-notice" role="status">Calendar is temporarily unavailable. Hub-authored items, if any, remain below.</p> : null}
+            {state === "partial" ? <p className="feed-notice" role="status">Some calendar information is temporarily unavailable.</p> : null}
             <UpcomingList items={departmentEvents} loading={state === "loading"} />
             <Link className="text-link section-link" to="/upcoming">View all upcoming <ArrowRight aria-hidden="true" size={18} /></Link>
           </section>

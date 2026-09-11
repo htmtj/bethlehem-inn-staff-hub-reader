@@ -1,10 +1,17 @@
 import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import { departments } from "../lib/content";
 import { useCalendarEvents } from "../hooks/useCalendarEvents";
 import { CalendarView } from "../components/CalendarView";
 
 export function UpcomingPage() {
+  const location = useLocation();
+  // A search result can target this route while it is already open, even with the same URL.
+  return <UpcomingContent key={location.key} />;
+}
+
+function UpcomingContent() {
   const [department, setDepartment] = useState("all");
   const [category, setCategory] = useState("all");
   const { events: active, state, range, refresh } = useCalendarEvents();
@@ -27,8 +34,9 @@ export function UpcomingPage() {
         </div>
       </header>
       {state === "unavailable" ? (
-        <p className="feed-notice" role="status">Calendar is unavailable. No replacement or sample events are shown.</p>
+        <p className="feed-notice" role="status">Calendar could not be refreshed. Try again in a moment.</p>
       ) : null}
+      {state === "partial" ? <p className="feed-notice" role="status">Some calendar information is temporarily unavailable. Available events are shown below.</p> : null}
       <section aria-labelledby="upcoming-list-heading">
         <div className="section-heading-row">
           <h2 id="upcoming-list-heading">Staff events</h2>
@@ -51,7 +59,7 @@ export function UpcomingPage() {
           </label>
         </div> : null}
         <div className="upcoming-page-list">
-          <CalendarView events={filtered} loading={state === "loading"} unavailable={state === "unavailable"} range={range} />
+          <CalendarView events={filtered} loading={state === "loading"} unavailable={state === "unavailable"} partial={state === "partial"} range={range} />
         </div>
       </section>
     </div>

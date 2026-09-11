@@ -17,11 +17,11 @@ export function useCalendarEvents(enabled = true) {
     const load = () => {
     setState("loading");
     loadCalendarFeed()
-      .then(({ events: items, range: nextRange }) => {
+      .then(({ events: items, range: nextRange, partial }) => {
         if (cancelled) return;
         setCalendarEvents(items);
         setRange(nextRange);
-        setState("ready");
+        setState(partial ? "partial" : "ready");
       })
       .catch(() => {
         if (!cancelled) { setCalendarEvents([]); setState("unavailable"); }

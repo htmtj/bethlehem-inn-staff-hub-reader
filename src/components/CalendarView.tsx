@@ -8,6 +8,7 @@ type Props = {
   events: EventItem[];
   loading?: boolean;
   unavailable?: boolean;
+  partial?: boolean;
   range?: CalendarRange;
 };
 
@@ -37,7 +38,7 @@ function readableDate(value: string): string {
   return new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date(`${value}T12:00:00`));
 }
 
-export function CalendarView({ events, loading = false, unavailable = false, range = calendarRange() }: Props) {
+export function CalendarView({ events, loading = false, unavailable = false, partial = false, range = calendarRange() }: Props) {
   const todayKey = hubDateKey(new Date());
   const today = new Date(`${todayKey}T12:00:00`);
   const requestedDate = new URLSearchParams(window.location.search).get("date");
@@ -130,7 +131,7 @@ export function CalendarView({ events, loading = false, unavailable = false, ran
               <span>Selected date</span>
               <h2 id="calendar-agenda-heading">{readableDate(selectedDate)}</h2>
             </div>
-            <strong>{selectedEvents.length} {selectedEvents.length === 1 ? "event" : "events"}</strong>
+            <strong>{loading ? "Checking…" : unavailable ? "Unavailable" : `${selectedEvents.length} ${partial ? "available " : ""}${selectedEvents.length === 1 ? "event" : "events"}`}</strong>
           </div>
           {unavailable ? (
             <div className="calendar-empty-state"><CalendarDays aria-hidden="true" /><h3>Calendar temporarily unavailable</h3><p>We couldn’t confirm the events for this date. Use Refresh calendar to try again.</p></div>
@@ -142,11 +143,13 @@ export function CalendarView({ events, loading = false, unavailable = false, ran
                 <li key={event.id}>
                   <div className="calendar-agenda__time"><Clock3 aria-hidden="true" size={15} /> {formatEventTime(event)}</div>
                   <h3>{event.title}</h3>
-                  <p>{event.description}</p>
-                  <div className="calendar-agenda__meta"><span><MapPin aria-hidden="true" size={14} /> {event.location || "Location not provided"}</span><span>{getDepartmentName(event.department)}</span></div>
+                  {event.description ? <p>{event.description}</p> : null}
+                  <div className="calendar-agenda__meta">{event.location ? <span><MapPin aria-hidden="true" size={14} /> {event.location}</span> : null}<span>{getDepartmentName(event.department)}</span></div>
                 </li>
               ))}
             </ul>
+          ) : partial ? (
+            <div className="calendar-empty-state"><CalendarDays aria-hidden="true" /><h3>No available events for this date</h3><p>Some calendar information could not be loaded. Refresh to check again.</p></div>
           ) : (
             <div className="calendar-empty-state"><CalendarDays aria-hidden="true" /><h3>{monthEvents.length ? "No events on this date" : "No staff events are scheduled for this period"}</h3><p>{monthEvents.length ? "Choose a highlighted date to see its staff events." : "Approved staff events will appear here when they are added."}</p></div>
           )}
@@ -157,7 +160,7 @@ export function CalendarView({ events, loading = false, unavailable = false, ran
         <section aria-labelledby="next-up-heading" className="calendar-next-up">
           <div className="section-heading-row"><h2 id="next-up-heading">This month</h2><span>{monthEvents.length} events</span></div>
           <ol>
-            {monthEvents.map((event) => <li key={event.id}><time dateTime={event.startAt}>{formatEventDate(event.startAt)}</time><div><button className="text-link" onClick={() => setSelectedDate(eventDateKey(event.startAt) < dateKey(cursor) ? dateKey(cursor) : eventDateKey(event.startAt))} type="button">{event.title}</button><span>{formatEventTime(event)} · {event.location}</span></div></li>)}
+            {monthEvents.map((event) => <li key={event.id}><time dateTime={event.startAt}>{formatEventDate(event.startAt)}</time><div><button className="text-link" onClick={() => setSelectedDate(eventDateKey(event.startAt) < dateKey(cursor) ? dateKey(cursor) : eventDateKey(event.startAt))} type="button">{event.title}</button><span>{formatEventTime(event)}{event.location ? ` · ${event.location}` : ""}</span></div></li>)}
           </ol>
         </section>
       ) : null}

@@ -67,6 +67,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         </label>
         <div aria-live="polite" className="search-results">
           {state === "unavailable" ? <p className="feed-notice">Calendar search is temporarily unavailable. News, departments, and resources are still searchable.</p> : null}
+          {state === "partial" ? <p className="feed-notice" role="status">Some calendar events may be missing from these results. Try again later.</p> : null}
           {!query.trim() ? (
             <p className="search-prompt">Start typing to search current Staff Hub content.</p>
           ) : results.length ? (

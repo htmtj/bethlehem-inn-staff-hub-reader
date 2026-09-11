@@ -120,6 +120,7 @@ export function HomePage() {
               <CalendarDays aria-hidden="true" className="heading-icon" />
             </div>
             <p className="feed-intro">{calendarMonth} · Approved staff events and organizational dates.</p>
+            {calendarState === "partial" ? <p className="feed-notice" role="status">Some calendar information is temporarily unavailable.</p> : null}
             {calendarState === "unavailable" ? <p className="feed-notice" role="status">Calendar is temporarily unavailable. Open Calendar to retry.</p> : <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading"} />}
             <Link className="text-link section-link" to="/upcoming">
               View Calendar <ArrowRight aria-hidden="true" size={18} />

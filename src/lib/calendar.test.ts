@@ -34,4 +34,9 @@ describe("Calendar event merge", () => {
     expect(merged.map((item) => item.id)).toEqual(["calendar-1", "sample"]);
     expect(merged.find((item) => item.id === "sample")?.startAt).toBe("2026-10-02T11:00:00Z");
   });
+  it("preserves valid events while reporting incomplete source availability", async () => {
+    const items = [event("available", "2026-10-01T09:00:00Z")];
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ events: items, source: "calendar", availability: "partial" })));
+    await expect(loadCalendarFeed()).resolves.toMatchObject({ events: items, partial: true });
+  });
 });

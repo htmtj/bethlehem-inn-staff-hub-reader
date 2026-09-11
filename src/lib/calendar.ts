@@ -1,15 +1,16 @@
 import type { EventItem } from "../types/content";
 import { calendarRange, type CalendarRange } from "./eventDates";
 
-export type CalendarFeedState = "loading" | "ready" | "unavailable";
+export type CalendarFeedState = "loading" | "ready" | "partial" | "unavailable";
 
 type CalendarResponse = {
   events?: EventItem[];
   source?: string;
   range?: CalendarRange;
+  availability?: "complete" | "partial";
 };
 
-export async function loadCalendarFeed(): Promise<{ events: EventItem[]; range: CalendarRange }> {
+export async function loadCalendarFeed(): Promise<{ events: EventItem[]; range: CalendarRange; partial: boolean }> {
   const response = await fetch("/api/calendar", {
     credentials: "same-origin",
     headers: { Accept: "application/json" },
@@ -18,7 +19,7 @@ export async function loadCalendarFeed(): Promise<{ events: EventItem[]; range: 
   if (!response.ok) throw new Error("Calendar feed unavailable");
   const payload = await response.json() as CalendarResponse;
   if (payload.source !== "calendar" || !Array.isArray(payload.events)) throw new Error("Calendar feed unavailable");
-  return { events: payload.events, range: payload.range ?? calendarRange() };
+  return { events: payload.events, range: payload.range ?? calendarRange(), partial: payload.availability === "partial" };
 }
 
 export async function loadCalendarEvents(): Promise<EventItem[]> { return (await loadCalendarFeed()).events; }

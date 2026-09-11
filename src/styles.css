@@ -1791,10 +1791,16 @@ select {
 }
 
 .feed-notice {
-  margin: -0.75rem 0 1.25rem;
-  color: var(--ink-muted);
+  margin: 0.75rem 0 1.25rem;
+  padding: 12px 16px;
+  border-left: 3px solid var(--teal-700);
+  border-radius: 8px;
+  background: var(--teal-100);
+  color: var(--ink);
   font-size: 0.9rem;
 }
+
+.page-stack > .feed-notice { margin-top: 24px; }
 
 .empty-state svg {
   margin-bottom: 12px;
