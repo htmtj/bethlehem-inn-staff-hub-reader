@@ -12,7 +12,7 @@
     "publishedAt": "2026-09-14T19:55:40.034Z",
     "effectiveAt": null,
     "expiresAt": null,
-    "status": "published",
+    "status": "archived",
     "priority": "high",
     "pinned": false,
     "actionNeeded": false,
@@ -22,7 +22,7 @@
     "image": null,
     "imageAlt": null,
     "createdAt": "2026-09-14T19:55:40.621Z",
-    "updatedAt": "2026-09-14T19:55:40.621Z"
+    "updatedAt": "2026-09-14T19:57:37.504Z"
   },
   {
     "id": "news-525abb52-ddcc-4688-b0e7-559d2549dc76",
