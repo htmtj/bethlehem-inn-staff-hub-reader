@@ -1,5 +1,30 @@
 [
   {
+    "id": "news-500924fe-d163-4d22-9702-78c15814259a",
+    "slug": "serg-500924fe",
+    "title": "serg",
+    "summary": "sdfg",
+    "body": [
+      "sdfg"
+    ],
+    "department": "programs",
+    "category": "Department update",
+    "publishedAt": "2026-09-14T19:55:40.034Z",
+    "effectiveAt": null,
+    "expiresAt": null,
+    "status": "published",
+    "priority": "high",
+    "pinned": false,
+    "actionNeeded": false,
+    "actionText": null,
+    "contact": "",
+    "resourceLinks": [],
+    "image": null,
+    "imageAlt": null,
+    "createdAt": "2026-09-14T19:55:40.621Z",
+    "updatedAt": "2026-09-14T19:55:40.621Z"
+  },
+  {
     "id": "news-525abb52-ddcc-4688-b0e7-559d2549dc76",
     "slug": "staff-hub-delivery-verification-september-14-525abb52",
     "title": "Staff Hub delivery verification — September 14",
