@@ -133,6 +133,18 @@ function calendarDate(value: unknown): string | null {
   return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
 }
 
+/** Explicit approval only. TITLE is a deliberate public label, never inferred redaction. */
+export function approvedCaseManagementTitle(summary: unknown): string | null {
+  if (typeof summary !== "string" || !summary.startsWith(APPROVAL_PREFIX)) return null;
+  const remainder = summary.slice(APPROVAL_PREFIX.length).trim();
+  if (remainder.startsWith("[")) {
+    const override = /^\[TITLE: ([^\[\]\r\n]{1,200})\](?:\s|$)/.exec(remainder);
+    if (!override) return null; // Malformed override must never fall back to the private source title.
+    return cleanText(override[1], 200) || null;
+  }
+  return cleanText(remainder, 200) || null;
+}
+
 export function normalizeCalendarEvents(
   items: GoogleCalendarEvent[],
   publishedAt = new Date().toISOString(),
@@ -161,7 +173,7 @@ export function normalizeCalendarEvents(
     const endAt = calendarDate(allDay ? item.end?.date : item.end?.dateTime);
     if (restricted && !endAt) return [];
     if (endAt && endAt <= startAt) return [];
-    const title = cleanText(restricted ? (item.summary as string).slice(APPROVAL_PREFIX.length) : item.summary, 200);
+    const title = restricted ? approvedCaseManagementTitle(item.summary) : cleanText(item.summary, 200);
     if (restricted && !title) return [];
     const description = restricted ? "" : cleanText(item.description, 1000);
     const location = restricted ? "" : cleanText(item.location, 200) || "Bethlehem Inn";

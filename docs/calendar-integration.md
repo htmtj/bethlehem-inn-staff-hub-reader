@@ -15,11 +15,17 @@ Staff Hub Events is owned by `jobs@bethleheminn.org`; its Google calendar is not
 
 ## Staff approval workflow
 
-1. Select a non-sensitive organizational event. Never approve participant appointments, intakes, case notes or resident-specific meetings.
+1. Select an organizational event whose **staff-facing title and timing** have been approved for the public Reader. Never expose participant identities or case notes.
 2. Review its title and timing for **public web visibility**. The software does not identify or redact participant names from an approved title.
 3. Add the exact prefix, for example `[STAFF HUB] WorkSource-BIRCH`. Leading spaces, different capitalization or a marker later in the title do not qualify.
 4. Save in Google Calendar. For recurring events, deliberately choose the occurrence(s) or series being approved.
 5. Open Staff Hub Calendar and use **Refresh calendar**. Visible Reader tabs also refresh every five minutes. Opening Search performs a fresh read.
+
+### Separate safe display title
+
+If a Case Management title must retain private operational text, the explicit syntax is `[STAFF HUB] [TITLE: P&P Intake]` followed by the original private title. Only `P&P Intake` is returned to the Reader. The separate display title must be deliberately approved; the service does not guess or automatically redact names. Do not include participant names, initials or other identifying information inside the `[TITLE: ...]` value. Use a non-empty title of at most 200 characters, without square brackets or newlines. Malformed overrides are excluded, never displayed as raw titles.
+
+For a recurring non-sensitive service, approve the series title once using Google Calendar's series-edit option. Expanded occurrences inherit the approval; review any individually edited exceptions separately. An override approves timing as well as its generic title: do not approve an appointment whose timing itself is confidential. No real participant appointment is used for testing this feature.
 
 Edits appear on the next successful read. Removing the prefix or cancelling/deleting an event removes it from subsequent feeds. Already-open pages may retain previously approved content until their next refresh; this is not an instant revocation channel. Do not duplicate approved Case Management events manually into Staff Hub Events.
 

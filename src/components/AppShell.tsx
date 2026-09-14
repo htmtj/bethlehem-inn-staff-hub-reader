@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type PropsWithChildren } from "react"
 import { Menu, Search, ShieldCheck, X } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { SearchDialog } from "./SearchDialog";
+import { ReaderFreshness } from "./ReaderFreshness";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -88,7 +89,7 @@ export function AppShell({ children }: PropsWithChildren) {
           </div>
         </div>
       </header>
-      <main aria-hidden={searchOpen} id="main-content" inert={searchOpen ? true : undefined}>{children}</main>
+      <main aria-hidden={searchOpen} id="main-content" inert={searchOpen ? true : undefined}><ReaderFreshness />{children}</main>
       <footer aria-hidden={searchOpen} className="site-footer" inert={searchOpen ? true : undefined}>
         <div className="page-width site-footer__inner">
           <img alt="Bethlehem Inn — shelter, help, hope" src="/brand/bi-wordmark.jpg" />

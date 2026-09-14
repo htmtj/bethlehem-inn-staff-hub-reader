@@ -1,11 +1,12 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DepartmentIcon } from "../components/ContentIcons";
-import { departments, getActiveEvents, getActiveNews, getActiveResources } from "../lib/content";
+import { departments, getActiveNews, getActiveResources } from "../lib/content";
+import { useCalendarEvents } from "../hooks/useCalendarEvents";
 
 export function DepartmentsPage() {
   const activeNews = getActiveNews();
-  const activeEvents = getActiveEvents();
+  const { events: activeEvents, state } = useCalendarEvents();
   const activeResources = getActiveResources();
 
   return (
@@ -33,7 +34,7 @@ export function DepartmentsPage() {
                   </span>
                   <span className="department-directory__counts">
                     <small>{newsCount} update{newsCount === 1 ? "" : "s"}</small>
-                    <small>{eventCount} upcoming</small>
+                    <small>{state === "loading" ? "Loading events…" : `${eventCount} upcoming`}{state === "partial" || state === "unavailable" ? " · incomplete" : ""}</small>
                     <small>{resourceCount} resource{resourceCount === 1 ? "" : "s"}</small>
                   </span>
                   <ArrowRight aria-hidden="true" size={23} />

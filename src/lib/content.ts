@@ -3,6 +3,7 @@ import eventsJson from "../content/events.json";
 import newsJson from "../content/news.json";
 import resourcesJson from "../content/resources.json";
 import { hubDateKey } from "./eventDates";
+import { lifecycleState } from "./lifecycle";
 import type {
   Department,
   EventItem,
@@ -22,16 +23,12 @@ export const resources = resourcesJson as ResourceItem[];
 const asTime = (value: string) => new Date(value).getTime();
 
 export function isNewsActiveAt(item: NewsItem, timestamp: number): boolean {
-  return (
-    (item.status === "published" || item.status === "scheduled") &&
-    asTime(item.publishedAt) <= timestamp &&
-    (!item.expiresAt || asTime(item.expiresAt) > timestamp)
-  );
+  return Boolean(item.publishedAt) && lifecycleState(item, timestamp) === "published";
 }
 
-export function getActiveNews(now = new Date()): NewsItem[] {
+export function getActiveNews(now = new Date(), items = news): NewsItem[] {
   const timestamp = now.getTime();
-  return news
+  return items
     .filter((item) => isNewsActiveAt(item, timestamp))
     .sort((a, b) => {
       if (a.pinned !== b.pinned) return Number(b.pinned) - Number(a.pinned);
@@ -39,22 +36,30 @@ export function getActiveNews(now = new Date()): NewsItem[] {
     });
 }
 
-export function getArchivedNews(now = new Date()): NewsItem[] {
+export function getArchivedNews(now = new Date(), items = news): NewsItem[] {
   const timestamp = now.getTime();
-  return news
+  return items
     .filter(
       (item) =>
-        item.status === "archived" ||
-        item.status === "expired" ||
-        Boolean(item.expiresAt && asTime(item.expiresAt) <= timestamp),
+        item.status !== "draft" && lifecycleState(item, timestamp) === "archived" &&
+        asTime(item.publishedAt) <= timestamp,
     )
     .sort((a, b) => asTime(b.publishedAt) - asTime(a.publishedAt));
 }
 
-export function getImportantNews(now = new Date()): NewsItem[] {
-  return getActiveNews(now)
-    .filter((item) => item.pinned || item.priority === "urgent" || item.priority === "high")
-    .slice(0, 3);
+export function isImportantNews(item: NewsItem): boolean {
+  return item.pinned || item.actionNeeded || item.priority === "urgent" || item.priority === "high";
+}
+
+export function getImportantNews(now = new Date(), items = news): NewsItem[] {
+  return getActiveNews(now, items).filter(isImportantNews);
+}
+
+export function filterNews(items: NewsItem[], query = "", department = "all", importantOnly = false): NewsItem[] {
+  const normalized = query.trim().toLocaleLowerCase();
+  return items.filter(item => (department === "all" || item.department === department) &&
+    (!importantOnly || isImportantNews(item)) && (!normalized ||
+      [item.title, item.summary, ...item.body, item.category].join(" ").toLocaleLowerCase().includes(normalized)));
 }
 
 export function getActiveEvents(now = new Date()): EventItem[] {
@@ -64,11 +69,7 @@ export function getActiveEvents(now = new Date()): EventItem[] {
   return events
     .filter(
       (item) =>
-        (item.status === "published" ||
-          (item.status === "scheduled" &&
-            Boolean(item.publishedAt) &&
-            asTime(item.publishedAt as string) <= timestamp)) &&
-        (!item.expiresAt || asTime(item.expiresAt) > timestamp) &&
+        lifecycleState(item, timestamp) === "published" &&
         asTime(item.endAt ?? item.startAt) >= dayStart.getTime(),
     )
     .sort((a, b) => asTime(a.startAt) - asTime(b.startAt));
@@ -78,11 +79,7 @@ export function getActiveResources(now = new Date()): ResourceItem[] {
   const timestamp = now.getTime();
   return resources.filter(
     (item) =>
-      (item.status === "published" ||
-        (item.status === "scheduled" &&
-          Boolean(item.publishedAt) &&
-          asTime(item.publishedAt as string) <= timestamp)) &&
-      (!item.expiresAt || asTime(item.expiresAt) > timestamp),
+      lifecycleState(item, timestamp) === "published",
   );
 }
 

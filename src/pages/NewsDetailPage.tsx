@@ -2,6 +2,7 @@ import { ArrowLeft, CalendarDays, CircleAlert, Contact, ExternalLink, ListChecks
 import { Link, useParams } from "react-router-dom";
 import { formatDate, getActiveNews, getArchivedNews, getDepartmentName } from "../lib/content";
 import { NotFoundPage } from "./NotFoundPage";
+import { lifecycleState } from "../lib/lifecycle";
 
 export function NewsDetailPage() {
   const { slug } = useParams();
@@ -26,7 +27,7 @@ export function NewsDetailPage() {
         <div className="article-byline">
           <span>Published {formatDate(item.publishedAt)}</span>
           <span>{getDepartmentName(item.department)}</span>
-          {item.status === "archived" ? <span>Archived</span> : null}
+          {lifecycleState(item) === "archived" ? <span>Archive / history — no longer current</span> : null}
         </div>
       </header>
       <div className="article-layout">

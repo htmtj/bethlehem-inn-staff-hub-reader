@@ -1,0 +1,11 @@
+# Publishing and Reader delivery
+
+The GitHub record is authoritative. Saving a record and releasing the Reader are distinct steps: a successful save starts the existing automatic Cloudflare build. The publishing workspace reports the saved server revision and offers **Check Reader**. This compares its exact revision with the deployed, no-cache `reader-status.json`. Pending delivery is not described as live. A failed list refresh after a successful save does not ask the publisher to create the record again.
+
+**Check Reader** confirms the saved revision is deployed and eligible, or explains that it is scheduled, archived/expired or still pending. It is not an independent Cloudflare build-status endpoint; it does not claim a build started or completed until the production receipt proves delivery. **Open Reader** provides direct verification of a published update. If delivery stays pending, a maintainer should inspect the normal GitHub Cloudflare deployment check. Do not repeatedly publish the same content.
+
+Reader tabs check for a new release on route navigation, when returning to the visible tab, and every minute while visible. Navigation can safely load the latest document once per target release. Idle readers receive a visible **Load latest updates** action. The target-release query marker prevents repeated automatic refresh attempts during propagation. Admin never auto-refreshes and unfinished edits are preserved. An unavailable release check leaves already-loaded content intact.
+
+Admin status is derived from publication and expiration timestamps, not just the stored status: Draft, Scheduled, Published / active, Expired, Archived. Effective date describes when a change takes effect; it does not hide an already published advance notice. Expired and archived news stays in history, outside active Home, News and department feeds. A future publish date requires Schedule. Publication with an already elapsed expiration is rejected server-side.
+
+Updates appear in Home/News/the assigned department, not automatically as Calendar events. An intentionally authored Upcoming item uses the event contract; Calendar also merges approved read-only Google events. A date on an announcement does not create a Google Calendar event. Search follows the same eligible content collections.

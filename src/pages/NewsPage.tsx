@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { NewsList } from "../components/NewsList";
-import { departments, getActiveNews, getArchivedNews, getImportantNews } from "../lib/content";
+import { departments, getActiveNews, getArchivedNews, filterNews } from "../lib/content";
 
 export function NewsPage() {
   const [params] = useSearchParams();
@@ -10,22 +10,8 @@ export function NewsPage() {
   const [department, setDepartment] = useState(params.get("department") ?? "all");
   const [showArchive, setShowArchive] = useState(false);
   const importantOnly = params.get("priority") === "important";
-  const source = showArchive ? getArchivedNews() : importantOnly ? getImportantNews() : getActiveNews();
-  const importantIds = new Set(getImportantNews().map((item) => item.id));
-
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLocaleLowerCase();
-    return source.filter((item) => {
-      const matchesDepartment = department === "all" || item.department === department;
-      const matchesQuery =
-        !normalized ||
-        [item.title, item.summary, item.body.join(" "), item.category]
-          .join(" ")
-          .toLocaleLowerCase()
-          .includes(normalized);
-      return matchesDepartment && matchesQuery;
-    });
-  }, [department, query, source]);
+  const source = showArchive ? getArchivedNews() : getActiveNews();
+  const filtered = filterNews(source, query, department, !showArchive && importantOnly);
 
   return (
     <div className="page-width page-stack">
@@ -33,12 +19,6 @@ export function NewsPage() {
         <h1>News & updates</h1>
         <p>Important organizational news and recent department changes, kept findable after the first announcement.</p>
       </header>
-      {!showArchive ? (
-        <section aria-labelledby="important-news-page" className="priority-strip">
-          <h2 id="important-news-page">Important now</h2>
-          <NewsList compact items={getImportantNews()} />
-        </section>
-      ) : null}
       <section aria-labelledby="news-feed-heading">
         <div className="section-heading-row news-heading-row">
           <div>
@@ -71,7 +51,7 @@ export function NewsPage() {
           </label>
         </div>
         <p className="result-count">{filtered.length} item{filtered.length === 1 ? "" : "s"}</p>
-        <NewsList items={showArchive ? filtered : filtered.filter((item) => !importantIds.has(item.id))} />
+        <NewsList items={filtered} />
       </section>
     </div>
   );

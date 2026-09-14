@@ -59,7 +59,7 @@ function UpcomingContent() {
           </label>
         </div> : null}
         <div className="upcoming-page-list">
-          <CalendarView events={filtered} loading={state === "loading"} unavailable={state === "unavailable"} partial={state === "partial"} range={range} />
+          <CalendarView events={filtered} loading={state === "loading" && !active.length} unavailable={state === "unavailable" && !active.length} partial={state === "partial" || (state === "unavailable" && active.length > 0)} range={range} />
         </div>
       </section>
     </div>

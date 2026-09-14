@@ -19,11 +19,10 @@ import {
 } from "../lib/content";
 
 export function HomePage() {
-  const important = getImportantNews();
+  const important = getImportantNews().slice(0, 3);
   const feature = important[0];
   const secondary = important.slice(1);
-  const importantIds = new Set(important.map((item) => item.id));
-  const latest = getActiveNews().filter((item) => !importantIds.has(item.id)).slice(0, 4);
+  const latest = getActiveNews().sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).slice(0, 4);
   const { events: upcoming, state: calendarState } = useCalendarEvents();
   const quickResources = getActiveResources().filter((item) => item.featured).slice(0, 4);
   const calendarMonth = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
@@ -121,7 +120,8 @@ export function HomePage() {
             </div>
             <p className="feed-intro">{calendarMonth} · Approved staff events and organizational dates.</p>
             {calendarState === "partial" ? <p className="feed-notice" role="status">Some calendar information is temporarily unavailable.</p> : null}
-            {calendarState === "unavailable" ? <p className="feed-notice" role="status">Calendar is temporarily unavailable. Open Calendar to retry.</p> : <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading"} />}
+            {calendarState === "unavailable" ? <p className="feed-notice" role="status">Google Calendar is temporarily unavailable. Any available Staff Admin events are shown below.</p> : null}
+            {calendarState !== "unavailable" || upcoming.length > 0 ? <UpcomingList items={upcoming} limit={3} loading={calendarState === "loading" && !upcoming.length} /> : null}
             <Link className="text-link section-link" to="/upcoming">
               View Calendar <ArrowRight aria-hidden="true" size={18} />
             </Link>

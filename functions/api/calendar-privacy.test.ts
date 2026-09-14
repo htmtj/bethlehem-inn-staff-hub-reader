@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CASE_MANAGEMENT_CALENDAR_ID, fetchCalendarPages, fetchMergedCalendarEvents, normalizeCalendarEvents } from "./calendar";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { UpcomingList } from "../../src/components/UpcomingList";
 
 afterEach(() => vi.unstubAllGlobals());
 const range = { start: "2026-09-01", end: "2026-12-01" };
@@ -11,6 +14,25 @@ const project = (events: unknown[]) => normalizeCalendarEvents(events as never, 
 const isCase = (url: URL) => decodeURIComponent(url.pathname).includes(CASE_MANAGEMENT_CALENDAR_ID);
 
 describe("Case Management public approval boundary", () => {
+  it.each(["DCBH @ BIRCH", "Yoga at BIRCH", "WorkSource-BIRCH"])("supports explicitly approved recurring service titles: %s", title => {
+    const events = project([1, 2].map(index => ({ ...approved, id: `occurrence-${index}`, summary: `[STAFF HUB] ${title}` })));
+    expect(events.map(event => event.title)).toEqual([title, title]);
+  });
+  it("projects an explicitly supplied intake label without exposing the private source title in API or rendered Reader", () => {
+    const rawTitle = "P&P Intake - Synthetic Participant X. (m)";
+    const events = project([{ ...approved, summary: `[STAFF HUB] [TITLE: P&P Intake] ${rawTitle}`, description: "PRIVATE_SENTINEL", location: "PRIVATE_SENTINEL" }]);
+    expect(events[0].title).toBe("P&P Intake");
+    expect(JSON.stringify(events)).not.toContain("Synthetic Participant");
+    const html = renderToStaticMarkup(createElement(UpcomingList, { items: events }));
+    expect(html).toContain("P&amp;P Intake");
+    expect(html).not.toContain("Synthetic Participant");
+    expect(html).not.toContain("PRIVATE_SENTINEL");
+  });
+  it("fails closed for malformed or empty title overrides instead of exposing the remainder", () => {
+    for (const marker of ["[TITLE:]", "[TITLE: ]", "[TITLE: safe", "[title: safe]", "[TITLE: safe]PRIVATE", "[TITLE: <b></b>]"]) {
+      expect(project([{ ...approved, summary: `[STAFF HUB] ${marker} PRIVATE_SENTINEL` }])).toEqual([]);
+    }
+  });
   it("admits only the exact title prefix and strips it for display", () => {
     expect(project([approved])[0].title).toBe("WorkSource-BIRCH");
     for (const summary of ["WorkSource-BIRCH", "Participant intake - Synthetic Person", " [STAFF HUB] WorkSource", "[staff hub] WorkSource", "WorkSource [STAFF HUB]", "[STAFF HUB]", "[STAFF HUB] <b></b>", null]) {

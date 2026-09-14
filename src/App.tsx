@@ -9,8 +9,10 @@ import { NewsPage } from "./pages/NewsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ResourcesPage } from "./pages/ResourcesPage";
 import { UpcomingPage } from "./pages/UpcomingPage";
+import { useMinuteClock } from "./hooks/useMinuteClock";
 
 export default function App() {
+  useMinuteClock();
   const location = useLocation();
 
   if (location.pathname === "/admin" || location.pathname.startsWith("/admin/")) {

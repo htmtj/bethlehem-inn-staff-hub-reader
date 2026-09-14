@@ -1,0 +1,5 @@
+/reader-status.json
+  Cache-Control: no-store
+
+/*
+  X-Content-Type-Options: nosniff

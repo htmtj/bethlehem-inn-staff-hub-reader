@@ -161,6 +161,14 @@ function statusAndPublishTime(
   const requested = isStatus(input.status) ? input.status : "draft";
   const supplied = validIso(input.publishedAt, "Publish date");
   const publishedAt = requested === "published" ? supplied ?? now.toISOString() : supplied;
+  if (requested === "published" && publishedAt && Date.parse(publishedAt) > now.getTime()) {
+    throw new RequestError(400, "Use Schedule for a future publish date.");
+  }
+  const expiresAt = validIso(input.expiresAt, "Expiration date");
+  if ((requested === "published" || requested === "scheduled") && expiresAt &&
+      Date.parse(expiresAt) <= Math.max(now.getTime(), publishedAt ? Date.parse(publishedAt) : now.getTime())) {
+    throw new RequestError(400, "Expiration must be after publication and still in the future. Clear or change the expiration date.");
+  }
   return { status: normalizeStatus(requested, publishedAt, now), publishedAt };
 }
 

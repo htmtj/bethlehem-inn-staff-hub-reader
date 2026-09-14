@@ -13,7 +13,10 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getDepartmentName } from "../lib/content";
-import type { ContentStatus, EventItem, NewsItem, ResourceItem } from "../types/content";
+import type { EventItem, NewsItem, ResourceItem } from "../types/content";
+import { lifecycleLabel, lifecycleState } from "../lib/lifecycle";
+import { useMinuteClock } from "../hooks/useMinuteClock";
+import { deliveryState, loadReaderReceipt, type DeliveryItem } from "../lib/delivery";
 import { loadAdminBootstrap, mutateContent } from "./api";
 import { AdminEditor } from "./AdminEditor";
 import { useDialogFocus } from "../hooks/useDialogFocus";
@@ -34,9 +37,7 @@ const statusTabs: Array<{ label: string; value: StatusFilter }> = [
   { label: "Archived", value: "archived" },
 ];
 
-function displayStatus(status: ContentStatus): StatusFilter {
-  return status === "expired" ? "archived" : status;
-}
+const displayStatus = lifecycleState;
 
 function typeLabel(type: AdminContentType): string {
   if (type === "news") return "Update";
@@ -166,6 +167,7 @@ function PreviewDialog({ managed, onClose }: { managed: ManagedContent; onClose:
 }
 
 export function AdminPage() {
+  const now = useMinuteClock();
   const [actor, setActor] = useState<AdminActor | null>(null);
   const [content, setContent] = useState<AdminContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -181,6 +183,9 @@ export function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [messageError, setMessageError] = useState(false);
+  const [savedItem, setSavedItem] = useState<(DeliveryItem & { slug?: string }) | null>(null);
+  const [deliveryMessage, setDeliveryMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -219,15 +224,15 @@ export function AdminPage() {
 
   const managed = useMemo(() => (content ? allContent(content) : []), [content]);
   const counts = useMemo(
-    () => Object.fromEntries(statusTabs.map((tab) => [tab.value, managed.filter((entry) => displayStatus(entry.item.status) === tab.value).length])) as Record<StatusFilter, number>,
-    [managed],
+    () => Object.fromEntries(statusTabs.map((tab) => [tab.value, managed.filter((entry) => displayStatus(entry.item, now) === tab.value).length])) as Record<StatusFilter, number>,
+    [managed, now],
   );
   const visible = useMemo(
     () => managed.filter((entry) =>
-      displayStatus(entry.item.status) === status &&
+      displayStatus(entry.item, now) === status &&
       (typeFilter === "all" || entry.contentType === typeFilter) &&
       (departmentFilter === "all" || entry.item.department === departmentFilter)),
-    [departmentFilter, managed, status, typeFilter],
+    [departmentFilter, managed, status, typeFilter, now],
   );
 
   const beginNew = (contentType: AdminContentType) => {
@@ -251,6 +256,9 @@ export function AdminPage() {
     setSaving(true);
     setEditorError(null);
     setMessage(null);
+    setMessageError(false);
+    setSavedItem(null);
+    setDeliveryMessage(null);
     const operation: MutationOperation = editing ? "update" : "create";
     try {
       const result = await mutateContent({
@@ -259,17 +267,22 @@ export function AdminPage() {
         expectedSha: collectionSha(content, contentType),
         item,
       });
-      if (import.meta.env.DEV) {
-        setContent((current) => current ? updateLocalContent(current, contentType, result.item, operation, result.sha) : current);
-      } else {
-        const refreshed = await loadAdminBootstrap();
-        setActor(refreshed.actor);
-        setContent(refreshed.content);
-      }
+      // The mutation receipt is server truth. A subsequent list-read failure must not invite a duplicate create.
+      setContent((current) => current ? updateLocalContent(current, contentType, result.item, operation, result.sha) : current);
       setMessage(result.message);
+      setSavedItem(result.item as DeliveryItem & { slug?: string });
       setEditorType(null);
       setEditing(null);
-      setStatus(item.status === "draft" ? "draft" : item.status === "scheduled" ? "scheduled" : "published");
+      setStatus(displayStatus(result.item as DeliveryItem));
+      if (!import.meta.env.DEV) {
+        try {
+          const refreshed = await loadAdminBootstrap();
+          setActor(refreshed.actor);
+          setContent(refreshed.content);
+        } catch {
+          setMessage(`${result.message} The list could not be refreshed. Your write succeeded; do not submit it again.`);
+        }
+      }
     } catch (error) {
       setEditorError(error instanceof Error ? error.message : "This content could not be saved. Your changes have not been lost.");
     } finally {
@@ -281,6 +294,9 @@ export function AdminPage() {
     if (!content || !archiving) return;
     setSaving(true);
     setMessage(null);
+    setMessageError(false);
+    setSavedItem(null);
+    setDeliveryMessage(null);
     try {
       const result = await mutateContent({
         contentType: archiving.contentType,
@@ -288,19 +304,22 @@ export function AdminPage() {
         expectedSha: collectionSha(content, archiving.contentType),
         item: { id: archiving.item.id },
       });
-      if (import.meta.env.DEV) {
-        const archivedItem = { ...contentRecord(archiving), status: "archived", pinned: false, updatedAt: new Date().toISOString() };
-        setContent((current) => current ? updateLocalContent(current, archiving.contentType, archivedItem, "archive", result.sha) : current);
-      } else {
-        const refreshed = await loadAdminBootstrap();
-        setActor(refreshed.actor);
-        setContent(refreshed.content);
-      }
+      const archivedItem = import.meta.env.DEV ? { ...contentRecord(archiving), status: "archived", pinned: false, updatedAt: new Date().toISOString() } : result.item;
+      setContent((current) => current ? updateLocalContent(current, archiving.contentType, archivedItem, "archive", result.sha) : current);
       setArchiving(null);
       setMessage(result.message);
+      setSavedItem(result.item as DeliveryItem & { slug?: string });
       setStatus("archived");
+      if (!import.meta.env.DEV) {
+        try {
+          const refreshed = await loadAdminBootstrap();
+          setActor(refreshed.actor);
+          setContent(refreshed.content);
+        } catch { setMessage(`${result.message} The list could not be refreshed; the archive write succeeded.`); }
+      }
     } catch (error) {
       setArchiving(null);
+      setMessageError(true);
       setMessage(error instanceof Error ? error.message : "This item could not be archived.");
     } finally {
       setSaving(false);
@@ -369,7 +388,18 @@ export function AdminPage() {
           </div>
         </div>
 
-        {message ? <div aria-live="polite" className="admin-message admin-message--success">{message}</div> : null}
+        {message ? <div role={messageError ? "alert" : "status"} className={`admin-message ${messageError ? "admin-message--error" : "admin-message--success"}`}>
+          <p>{message}</p>
+          {savedItem && savedItem.status !== "draft" ? <>
+            <button className="button button--secondary" onClick={async () => {
+              setDeliveryMessage("Checking the deployed Reader…");
+              try { setDeliveryMessage(deliveryState(await loadReaderReceipt(), savedItem)); }
+              catch (error) { setDeliveryMessage(error instanceof Error ? error.message : "Could not verify delivery."); }
+            }}>Check Reader</button>{" "}
+            <a className="button button--secondary" href={savedItem.slug ? `/news/${savedItem.slug}` : "/"} target="_blank" rel="noopener">Open Reader</a>
+            {deliveryMessage ? <p>{deliveryMessage}</p> : null}
+          </> : null}
+        </div> : null}
 
         <section aria-labelledby="content-heading" className="admin-content-panel">
           <h2 className="sr-only" id="content-heading">Staff Hub content</h2>
@@ -432,7 +462,7 @@ export function AdminPage() {
                       <td data-label="Title"><strong>{entry.item.title}</strong></td>
                       <td data-label="Type">{typeLabel(entry.contentType)}</td>
                       <td data-label="Department">{getDepartmentName(entry.item.department)}</td>
-                      <td data-label="Status"><span className={`admin-status admin-status--${displayStatus(entry.item.status)}`}>{displayStatus(entry.item.status)}</span></td>
+                      <td data-label="Status"><span className={`admin-status admin-status--${displayStatus(entry.item, now)}`}>{lifecycleLabel(entry.item, now)}</span></td>
                       <td className="admin-table__desktop-time" data-label="Publish date">{formatDateTime(itemDate(entry))}</td>
                       <td className="admin-lifecycle" data-label="Effective / expires">
                         {itemEffectiveAt(entry) ? <span><b>Effective</b> {formatDateTime(itemEffectiveAt(entry))}</span> : null}

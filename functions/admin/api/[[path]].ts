@@ -1,4 +1,6 @@
 import type { PluginData } from "@cloudflare/pages-plugin-cloudflare-access";
+import { publicationMessage } from "../../../src/lib/lifecycle";
+import type { ContentStatus } from "../../../src/types/content";
 import {
   RequestError,
   applyMutation,
@@ -222,12 +224,7 @@ async function handleRequest(context: FunctionContext): Promise<Response> {
       item: changed.item,
       commitUrl: write.commitUrl,
       sha: write.contentSha,
-      message:
-        mutation.operation === "archive"
-          ? "Archived. Staff Hub is updating now."
-          : mutation.item.status === "draft"
-            ? "Draft saved."
-            : "Published. Staff Hub is updating now.",
+      message: publicationMessage(changed.item.status as ContentStatus),
     });
   }
 
