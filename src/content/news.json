@@ -1,5 +1,31 @@
 [
   {
+    "id": "news-191a3fb0-3945-43a8-a2ab-ecd7bf290266",
+    "slug": "test-staff-hub-design-release-verification-september-15-191a3fb0",
+    "title": "TEST — Staff Hub design release verification — September 15",
+    "summary": "Temporary technical verification only. No staff action is required. This item will be archived after testing.",
+    "body": [
+      "Authorized production verification of Draft, Schedule, Publish, Edit, and Archive. This is not an operational instruction.",
+      "Verification revision one."
+    ],
+    "department": "kitchen",
+    "category": "Department update",
+    "publishedAt": "2026-09-15T19:14:02.930Z",
+    "effectiveAt": null,
+    "expiresAt": null,
+    "status": "draft",
+    "priority": "standard",
+    "pinned": false,
+    "actionNeeded": false,
+    "actionText": null,
+    "contact": "",
+    "resourceLinks": [],
+    "image": null,
+    "imageAlt": null,
+    "createdAt": "2026-09-15T19:14:02.930Z",
+    "updatedAt": "2026-09-15T19:14:02.930Z"
+  },
+  {
     "id": "news-500924fe-d163-4d22-9702-78c15814259a",
     "slug": "serg-500924fe",
     "title": "serg",
