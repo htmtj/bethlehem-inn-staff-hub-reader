@@ -30,11 +30,11 @@
     "title": "Staff Hub delivery verification — September 14",
     "summary": "Temporary publishing verification. No staff action is required; this test announcement will be archived after delivery checks.",
     "body": [
-      "This non-sensitive Kitchen test verifies the September 14 content-delivery fix. Delivery revision two confirms an already-open Reader detects a newly deployed update. No staff action is required."
+      "Non-sensitive delivery verification, completed September 15. This temporary Kitchen test checks immediate Published / active status after saving. No staff action is required."
     ],
     "department": "kitchen",
     "category": "Department update",
-    "publishedAt": "2026-09-14T19:03:15.953Z",
+    "publishedAt": "2026-09-15T15:02:46.698Z",
     "effectiveAt": null,
     "expiresAt": null,
     "status": "published",
@@ -47,7 +47,7 @@
     "image": null,
     "imageAlt": null,
     "createdAt": "2026-09-14T14:50:43.777Z",
-    "updatedAt": "2026-09-14T19:03:16.316Z"
+    "updatedAt": "2026-09-15T15:02:47.651Z"
   },
   {
     "id": "news-9d84c307-0ac7-47e1-881a-8c3e88723b87",
