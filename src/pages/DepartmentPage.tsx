@@ -10,6 +10,7 @@ import {
   getActiveNews,
   getActiveResources,
   getDepartment,
+  isImportantNews,
 } from "../lib/content";
 import { NotFoundPage } from "./NotFoundPage";
 
@@ -20,8 +21,7 @@ export function DepartmentPage() {
   if (!department) return <NotFoundPage />;
 
   const departmentNews = getActiveNews().filter((item) => item.department === department.id);
-  const important = departmentNews.find((item) => item.priority !== "standard" || item.actionNeeded);
-  const remainingNews = departmentNews.filter((item) => item.id !== important?.id);
+  const important = departmentNews.find(isImportantNews);
   const departmentEvents = events.filter((item) => item.department === department.id);
   const departmentResources = getActiveResources().filter((item) => item.department === department.id);
 
@@ -66,7 +66,7 @@ export function DepartmentPage() {
                 All updates <ArrowRight aria-hidden="true" size={18} />
               </Link>
             </div>
-            <NewsList items={remainingNews} />
+            <NewsList items={departmentNews} />
           </section>
         </div>
         <aside className="department-sidebar">

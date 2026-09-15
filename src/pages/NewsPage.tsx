@@ -16,7 +16,7 @@ export function NewsPage() {
   return (
     <div className="page-width page-stack">
       <header className="page-header">
-        <h1>News & updates</h1>
+        <h1>Updates</h1>
         <p>Important organizational news and recent department changes, kept findable after the first announcement.</p>
       </header>
       <section aria-labelledby="news-feed-heading">
@@ -50,8 +50,8 @@ export function NewsPage() {
             </select>
           </label>
         </div>
-        <p className="result-count">{filtered.length} item{filtered.length === 1 ? "" : "s"}</p>
-        <NewsList items={filtered} />
+        <p className="result-count" role="status">{filtered.length} item{filtered.length === 1 ? "" : "s"}</p>
+        {filtered.length ? <NewsList items={filtered} /> : <div className="empty-state"><h3>{query.trim() || department !== "all" ? "No matching updates" : showArchive ? "No archived updates" : "You’re up to date"}</h3><p>{query.trim() || department !== "all" ? "Try another term or choose all departments." : showArchive ? "Expired and archived updates will appear here." : "New published updates will appear here."}</p></div>}
       </section>
     </div>
   );

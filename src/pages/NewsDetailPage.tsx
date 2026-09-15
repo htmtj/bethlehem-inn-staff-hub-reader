@@ -16,7 +16,7 @@ export function NewsDetailPage() {
   return (
     <article className="page-width article-page">
       <nav aria-label="Breadcrumb" className="breadcrumb">
-        <Link to="/news"><ArrowLeft aria-hidden="true" size={17} /> All news</Link>
+        <Link to="/news"><ArrowLeft aria-hidden="true" size={17} /> All updates</Link>
         <span>/</span>
         <Link to={`/departments/${item.department}`}>{getDepartmentName(item.department)}</Link>
       </nav>

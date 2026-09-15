@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, Info, Search, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { ResourceList } from "../components/ResourceList";
@@ -23,6 +23,33 @@ export function ResourcesPage() {
   const resources = getActiveResources();
   const focusId = params.get("focus");
   const focused = resources.find((item) => item.id === focusId);
+  const previewRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dialog = previewRef.current;
+    if (!focused || !dialog) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.showModal();
+    const trap = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const controls = Array.from(dialog.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'));
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        event.preventDefault(); first?.focus();
+      }
+    };
+    dialog.addEventListener("keydown", trap);
+    return () => {
+      dialog.removeEventListener("keydown", trap);
+      dialog.close();
+      document.body.style.overflow = overflow;
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, [focused?.id]);
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase();
@@ -92,7 +119,7 @@ export function ResourcesPage() {
       </section>
 
       {focused ? (
-        <aside aria-labelledby="resource-preview-heading" className="resource-preview">
+        <dialog ref={previewRef} aria-labelledby="resource-preview-heading" className="resource-preview" onCancel={(event) => { event.preventDefault(); closePreview(); }}>
           <button aria-label="Close resource details" className="icon-button" onClick={closePreview} type="button"><X aria-hidden="true" /></button>
           {!focused.destinationUrl ? <span className="sample-resource-label">Link pending approval</span> : null}
           <h2 id="resource-preview-heading">{focused.title}</h2>
@@ -109,7 +136,7 @@ export function ResourcesPage() {
               rel="noopener noreferrer"
               target="_blank"
             >
-              Open resource <ExternalLink aria-hidden="true" size={18} />
+              Open resource <ExternalLink aria-hidden="true" size={18} /><span className="sr-only"> (opens in a new tab)</span>
             </a>
           ) : (
             <>
@@ -125,7 +152,7 @@ export function ResourcesPage() {
               </button>
             </>
           )}
-        </aside>
+        </dialog>
       ) : null}
     </div>
   );

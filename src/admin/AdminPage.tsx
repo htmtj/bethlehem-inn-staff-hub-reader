@@ -30,6 +30,14 @@ import type {
 
 type StatusFilter = "draft" | "scheduled" | "published" | "archived";
 
+function focusEditor() {
+  window.setTimeout(() => {
+    const heading = document.getElementById("editor-heading");
+    heading?.focus({ preventScroll: true });
+    heading?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" });
+  }, 0);
+}
+
 const statusTabs: Array<{ label: string; value: StatusFilter }> = [
   { label: "Drafts", value: "draft" },
   { label: "Scheduled", value: "scheduled" },
@@ -240,7 +248,7 @@ export function AdminPage() {
     setEditorType(contentType);
     setEditorError(null);
     setMessage(null);
-    window.setTimeout(() => document.getElementById("editor-heading")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    focusEditor();
   };
 
   const beginEdit = (item: ManagedContent) => {
@@ -248,7 +256,7 @@ export function AdminPage() {
     setEditorType(item.contentType);
     setEditorError(null);
     setMessage(null);
-    window.setTimeout(() => document.getElementById("editor-heading")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+    focusEditor();
   };
 
   const save = async (contentType: AdminContentType, item: Record<string, unknown>) => {

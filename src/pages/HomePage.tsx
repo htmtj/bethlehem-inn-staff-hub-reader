@@ -31,8 +31,9 @@ export function HomePage() {
     <>
       <section className="home-intro">
         <div className="page-width">
-          <h1>What you need to know right now</h1>
-          <p>Important updates, recent changes, upcoming dates, and useful staff resources in one place.</p>
+          <span className="home-date">{new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "America/Los_Angeles" }).format(new Date())}</span>
+          <h1>Your staff hub</h1>
+          <p>What matters now. What’s changed. What’s coming up.</p>
         </div>
       </section>
 
@@ -40,14 +41,14 @@ export function HomePage() {
         <div className="section-heading-row">
           <div>
             <span className="section-symbol"><Megaphone aria-hidden="true" size={20} /></span>
-            <h2 id="important-heading">Important News</h2>
+            <h2 id="important-heading">Important updates</h2>
           </div>
           <Link className="text-link" to="/news?priority=important">
-            View important news <ArrowRight aria-hidden="true" size={18} />
+            View important updates <ArrowRight aria-hidden="true" size={18} />
           </Link>
         </div>
         {feature ? (
-          <div className="important-layout">
+          <div className={`important-layout${secondary.length ? "" : " important-layout--single"}`}>
             <article className="featured-news">
               <div className="featured-news__icon"><Megaphone aria-hidden="true" size={45} /></div>
               <div className="featured-news__copy">
@@ -67,7 +68,7 @@ export function HomePage() {
                 </Link>
               </div>
             </article>
-            <div className="important-secondary">
+            {secondary.length ? <div className="important-secondary">
               {secondary.map((item) => (
                 <Link key={item.id} to={`/news/${item.slug}`}>
                   <span className={`content-icon accent-${item.department}`}>
@@ -83,7 +84,7 @@ export function HomePage() {
                   <ArrowRight aria-hidden="true" size={20} />
                 </Link>
               ))}
-            </div>
+            </div> : null}
           </div>
         ) : (
           <div className="empty-state">
@@ -103,14 +104,14 @@ export function HomePage() {
         <div className="page-width home-feed-grid">
           <section aria-labelledby="latest-heading">
             <div className="section-heading-row">
-              <h2 id="latest-heading">Latest from Bethlehem Inn</h2>
+              <h2 id="latest-heading">Latest updates</h2>
               <Link className="text-link home-latest-link" to="/news">
-                View all news <ArrowRight aria-hidden="true" size={18} />
+                All updates <ArrowRight aria-hidden="true" size={18} />
               </Link>
             </div>
             <NewsList compact items={latest} />
             <Link className="text-link section-link mobile-only" to="/news">
-              View all news <ArrowRight aria-hidden="true" size={18} />
+              All updates <ArrowRight aria-hidden="true" size={18} />
             </Link>
           </section>
           <section aria-labelledby="upcoming-heading">

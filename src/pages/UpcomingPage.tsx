@@ -29,8 +29,8 @@ function UpcomingContent() {
       <header className="page-header page-header--icon">
         <span><CalendarDays aria-hidden="true" /></span>
         <div>
-          <h1>Calendar &amp; Upcoming</h1>
-          <p>Meetings, trainings, deadlines, and organizational dates from the Staff Hub calendar.</p>
+          <h1>Calendar</h1>
+          <p>Approved staff events, services, and dates. All times are Pacific.</p>
         </div>
       </header>
       {state === "unavailable" ? (
@@ -42,7 +42,7 @@ function UpcomingContent() {
           <h2 id="upcoming-list-heading">Staff events</h2>
           <button className="button button--secondary" disabled={state === "loading"} onClick={refresh} type="button">{state === "loading" ? "Refreshing…" : "Refresh calendar"}</button>
         </div>
-        {active.length > 0 ? <div className="filter-bar filter-bar--selects">
+        {active.length > 0 ? <details className="calendar-filters"><summary>Filter events{department !== "all" || category !== "all" ? " · filters applied" : ""}</summary><div className="filter-bar filter-bar--selects">
           <label>
             <span>Department</span>
             <select onChange={(event) => setDepartment(event.target.value)} value={department}>
@@ -57,7 +57,7 @@ function UpcomingContent() {
               {categories.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
-        </div> : null}
+        </div></details> : null}
         <div className="upcoming-page-list">
           <CalendarView events={filtered} loading={state === "loading" && !active.length} unavailable={state === "unavailable" && !active.length} partial={state === "partial" || (state === "unavailable" && active.length > 0)} range={range} />
         </div>

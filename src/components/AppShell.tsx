@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type PropsWithChildren } from "react";
+import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from "react";
 import { Menu, Search, ShieldCheck, X } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { SearchDialog } from "./SearchDialog";
@@ -6,18 +6,31 @@ import { ReaderFreshness } from "./ReaderFreshness";
 
 const navItems = [
   { label: "Home", href: "/" },
-  { label: "News", href: "/news" },
+  { label: "Updates", href: "/news" },
   { label: "Calendar", href: "/upcoming" },
   { label: "Departments", href: "/departments" },
-  { label: "Resources", href: "/resources" },
+  { label: "Links", href: "/links" },
 ];
 
 export function AppShell({ children }: PropsWithChildren) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
+  const menuButton = useRef<HTMLButtonElement>(null);
 
   const closeSearch = useCallback(() => setSearchOpen(false), []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButton.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", dismiss);
+    return () => window.removeEventListener("keydown", dismiss);
+  }, [menuOpen]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -43,7 +56,7 @@ export function AppShell({ children }: PropsWithChildren) {
             <img alt="" height="52" src="/brand/bi-logo.png" width="52" />
             <span>Bethlehem Inn <strong>Staff Hub</strong></span>
           </Link>
-          <nav aria-label="Primary navigation" className={menuOpen ? "primary-nav is-open" : "primary-nav"}>
+          <nav id="primary-navigation" aria-label="Primary navigation" className={menuOpen ? "primary-nav is-open" : "primary-nav"}>
             {navItems.map((item) => (
               <NavLink
                 className={({ isActive }) => (isActive ? "is-active" : undefined)}
@@ -62,16 +75,19 @@ export function AppShell({ children }: PropsWithChildren) {
             <Link aria-label="Staff Admin" className="header-admin-link" title="Staff Admin" to="/admin">
               <ShieldCheck aria-hidden="true" size={17} /> <span>Staff Admin</span>
             </Link>
-            <button className="header-search" onClick={() => setSearchOpen(true)} type="button">
+            <button aria-label="Search the Staff Hub" className="header-search" onClick={() => setSearchOpen(true)} type="button">
               <Search aria-hidden="true" size={20} />
-              <span>Search the Staff Hub</span>
+              <span>Search</span>
               <kbd>⌘ K</kbd>
             </button>
             <button
               aria-expanded={menuOpen}
+              aria-controls="primary-navigation"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               className="mobile-menu-button"
+              ref={menuButton}
               onClick={() => setMenuOpen((value) => !value)}
+              onKeyDown={(event) => { if (event.key === "Escape") setMenuOpen(false); }}
               type="button"
             >
               {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}

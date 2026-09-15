@@ -105,8 +105,8 @@
     "title": "Annual emergency drill: updated arrival plan",
     "summary": "A sample organization-wide notice showing how the Hub highlights a time-sensitive change and the action staff should take.",
     "body": [
-      "This fictional beta notice demonstrates the reusable Staff Hub update format. For the sample drill, staff would use the north assembly area and review the posted arrival sequence before September 3.",
-      "The key information is kept together: what changed, when it becomes effective, what action is needed, and who owns the update. No real emergency procedures are included in this beta."
+      "Illustrative notice, not an operational instruction. This entry demonstrates the reusable Staff Hub update format.",
+      "The format keeps together what changed, when it becomes effective, what action is needed, and who owns the update. This entry does not contain approved emergency procedures."
     ],
     "department": "administration",
     "category": "Operations",
@@ -154,7 +154,7 @@
     "summary": "A sample checklist change shows how department-owned updates can be standardized and easy to scan.",
     "body": [
       "The fictional evening intake handoff now follows a consistent sequence so the next shift receives the same core information every time.",
-      "This entry is sample content only. A real Programs publisher could later supply approved details through a separate publishing workflow."
+      "Illustrative entry, not an operational instruction. Authorized Programs publishers can provide approved details through Staff Admin."
     ],
     "department": "programs",
     "category": "Department update",

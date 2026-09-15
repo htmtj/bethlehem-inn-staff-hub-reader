@@ -47,7 +47,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         <div className="search-dialog__header">
           <div>
             <h2>Search the Staff Hub</h2>
-            <p>Find active news, upcoming items, departments, and staff resources.</p>
+            <p>Find active updates, upcoming items, departments, and staff resources.</p>
           </div>
           <button aria-label="Close search" className="icon-button" onClick={onClose} type="button">
             <X aria-hidden="true" />
@@ -66,7 +66,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           />
         </label>
         <div aria-live="polite" className="search-results">
-          {state === "unavailable" ? <p className="feed-notice">Calendar search is temporarily unavailable. News, departments, and resources are still searchable.</p> : null}
+          {state === "unavailable" ? <p className="feed-notice">Calendar search is temporarily unavailable. Updates, departments, and resources are still searchable.</p> : null}
           {state === "partial" ? <p className="feed-notice" role="status">Some calendar events may be missing from these results. Try again later.</p> : null}
           {!query.trim() ? (
             <p className="search-prompt">Start typing to search current Staff Hub content.</p>
@@ -79,7 +79,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
                 {results.map((result) => (
                   <li key={`${result.type}-${result.id}`}>
                     <Link onClick={onClose} to={result.href}>
-                      <span className="result-type">{result.type}</span>
+                      <span className="result-type">{result.type === "News" ? "Update" : result.type}</span>
                       <span className="result-copy">
                         <strong>{result.title}</strong>
                         <span>{result.description}</span>

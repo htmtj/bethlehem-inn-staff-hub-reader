@@ -240,7 +240,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
     <section aria-labelledby="editor-heading" className="admin-editor">
       <div className="admin-editor__heading">
         <div>
-          <h2 id="editor-heading">{editing ? "Edit" : "New"} {isEdPublisher ? "Executive Director Message" : typeLabel(value.contentType)}</h2>
+          <h2 id="editor-heading" tabIndex={-1}>{editing ? "Edit" : "New"} {isEdPublisher ? "Executive Director Message" : typeLabel(value.contentType)}</h2>
           <p>{editing ? "Update the content, preview it, then save your changes." : "Create a clear, staff-ready item without editing the website."}</p>
         </div>
         <button aria-label="Close editor" className="icon-button" onClick={onCancel} type="button">
@@ -250,7 +250,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
 
       {error ? <p className="admin-message admin-message--error" role="alert">{error}</p> : null}
       <p className="admin-message">{value.status === "draft" ? "Save Draft keeps this item out of Reader views." : value.status === "scheduled" ? "This item becomes visible after the selected publish time and a successful site deployment." : "Publishing updates the public, no-login Reader after the site deploys."} Include only information approved for public display. Dates use your device’s local timezone.</p>
-      {isEdPublisher ? <p className="admin-message">Published messages appear in News, Latest Updates, search, and Administration. Important priority may also place a message in Important News. The Reader is public: include only information approved for public display.</p> : null}
+      {isEdPublisher ? <p className="admin-message">Published messages appear in Updates, Latest Updates, search, and Administration. Important priority may also place a message in Important updates. The Reader is public: include only information approved for public display.</p> : null}
 
       <form className="admin-form" onSubmit={(event) => event.preventDefault()}>
         <div className="admin-form__main">

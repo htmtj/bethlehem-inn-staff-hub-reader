@@ -158,7 +158,7 @@ export function CalendarView({ events, loading = false, unavailable = false, par
 
       {monthEvents.length ? (
         <section aria-labelledby="next-up-heading" className="calendar-next-up">
-          <div className="section-heading-row"><h2 id="next-up-heading">This month</h2><span>{monthEvents.length} events</span></div>
+          <div className="section-heading-row"><h2 id="next-up-heading">This month</h2><span>{monthEvents.length} {monthEvents.length === 1 ? "event" : "events"}</span></div>
           <ol>
             {monthEvents.map((event) => <li key={event.id}><time dateTime={event.startAt}>{formatEventDate(event.startAt)}</time><div><button className="text-link" onClick={() => setSelectedDate(eventDateKey(event.startAt) < dateKey(cursor) ? dateKey(cursor) : eventDateKey(event.startAt))} type="button">{event.title}</button><span>{formatEventTime(event)}{event.location ? ` · ${event.location}` : ""}</span></div></li>)}
           </ol>
