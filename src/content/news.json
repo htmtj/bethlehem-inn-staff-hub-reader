@@ -13,9 +13,9 @@
     "publishedAt": "2026-09-16T14:03:26.436Z",
     "effectiveAt": null,
     "expiresAt": null,
-    "status": "published",
+    "status": "archived",
     "priority": "standard",
-    "pinned": true,
+    "pinned": false,
     "actionNeeded": false,
     "actionText": null,
     "contact": "",
@@ -23,7 +23,7 @@
     "image": null,
     "imageAlt": null,
     "createdAt": "2026-09-15T19:14:02.930Z",
-    "updatedAt": "2026-09-16T14:03:27.250Z"
+    "updatedAt": "2026-09-16T14:05:13.565Z"
   },
   {
     "id": "news-500924fe-d163-4d22-9702-78c15814259a",
