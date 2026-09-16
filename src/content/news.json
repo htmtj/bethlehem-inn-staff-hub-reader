@@ -5,12 +5,12 @@
     "title": "TEST — Staff Hub design release verification — September 15",
     "summary": "Temporary technical verification only. No staff action is required. This item will be archived after testing.",
     "body": [
-      "Authorized production verification of Draft, Schedule, Publish, Edit, and Archive. This is not an operational instruction.",
-      "Verification revision one."
+      "Temporary technical verification only. Not an operational instruction.",
+      "Verification revision two — saved September 16. The newer revision must survive the stale-editor test."
     ],
     "department": "kitchen",
     "category": "Department update",
-    "publishedAt": "2026-09-15T19:17:23.289Z",
+    "publishedAt": "2026-09-16T14:03:26.436Z",
     "effectiveAt": null,
     "expiresAt": null,
     "status": "published",
@@ -23,7 +23,7 @@
     "image": null,
     "imageAlt": null,
     "createdAt": "2026-09-15T19:14:02.930Z",
-    "updatedAt": "2026-09-15T19:17:24.185Z"
+    "updatedAt": "2026-09-16T14:03:27.250Z"
   },
   {
     "id": "news-500924fe-d163-4d22-9702-78c15814259a",
