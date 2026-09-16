@@ -5,7 +5,7 @@ import {
   Megaphone,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { DepartmentIcon, ResourceIcon } from "../components/ContentIcons";
+import { DepartmentIcon } from "../components/ContentIcons";
 import { NewsList } from "../components/NewsList";
 import { UpcomingList } from "../components/UpcomingList";
 import { useCalendarEvents } from "../hooks/useCalendarEvents";
@@ -13,7 +13,6 @@ import {
   departments,
   formatShortDate,
   getActiveNews,
-  getActiveResources,
   getDepartmentName,
   getImportantNews,
 } from "../lib/content";
@@ -24,7 +23,6 @@ export function HomePage() {
   const secondary = important.slice(1);
   const latest = getActiveNews().sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).slice(0, 4);
   const { events: upcoming, state: calendarState } = useCalendarEvents();
-  const quickResources = getActiveResources().filter((item) => item.featured).slice(0, 4);
   const calendarMonth = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
 
   return (
@@ -87,16 +85,15 @@ export function HomePage() {
             </div> : null}
           </div>
         ) : (
-          <div className="empty-state">
-            <h3>No important notices</h3>
-            <p>There are no active high-priority items right now.</p>
+          <div className="home-clear-state">
+            <p>No important notices right now. Check the latest updates and upcoming events below.</p>
           </div>
         )}
       </section>
 
       <nav className="page-width staff-quick-actions" aria-label="Quick staff actions">
         <a href="https://bionboarding.netlify.app" target="_blank" rel="noopener noreferrer">Onboarding &amp; Training <ArrowRight aria-hidden="true" size={18} /><span className="sr-only"> (opens in a new tab)</span></a>
-        <Link to="/resources">Find a resource <ArrowRight aria-hidden="true" size={18} /></Link>
+        <Link to="/links">Bethlehem Inn links <ArrowRight aria-hidden="true" size={18} /></Link>
         <Link to="/upcoming">Check the calendar <CalendarDays aria-hidden="true" size={18} /></Link>
       </nav>
 
@@ -150,34 +147,6 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="section page-width" aria-labelledby="resources-heading">
-        <div className="section-heading-row">
-          <div>
-            <h2 id="resources-heading">Quick resources</h2>
-            <p>Common staff destinations and approved resources.</p>
-          </div>
-          <Link className="text-link home-resources-link" to="/resources">
-            Browse all resources <ArrowRight aria-hidden="true" size={18} />
-          </Link>
-        </div>
-        <div className="quick-resource-grid">
-          {quickResources.map((resource) => (
-            <Link key={resource.id} to={`/resources?focus=${resource.id}`}>
-              <span className="content-icon resource-icon">
-                <ResourceIcon category={resource.category} />
-              </span>
-              <span>
-                <strong>{resource.title}</strong>
-                <small>{resource.category}{resource.destinationUrl ? "" : " · Link pending approval"}</small>
-              </span>
-              <ArrowRight aria-hidden="true" size={20} />
-            </Link>
-          ))}
-        </div>
-        <Link className="text-link section-link mobile-only" to="/resources">
-          Browse all resources <ArrowRight aria-hidden="true" size={18} />
-        </Link>
-      </section>
     </>
   );
 }

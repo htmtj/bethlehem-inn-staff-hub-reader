@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AdminPage } from "./admin/AdminPage";
 import { AppShell } from "./components/AppShell";
 import { DepartmentPage } from "./pages/DepartmentPage";
@@ -8,7 +8,6 @@ import { LinksPage } from "./pages/LinksPage";
 import { NewsDetailPage } from "./pages/NewsDetailPage";
 import { NewsPage } from "./pages/NewsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { ResourcesPage } from "./pages/ResourcesPage";
 import { UpcomingPage } from "./pages/UpcomingPage";
 import { useMinuteClock } from "./hooks/useMinuteClock";
 
@@ -29,7 +28,7 @@ export default function App() {
         <Route element={<UpcomingPage />} path="/upcoming" />
         <Route element={<DepartmentsPage />} path="/departments" />
         <Route element={<DepartmentPage />} path="/departments/:departmentId" />
-        <Route element={<ResourcesPage />} path="/resources" />
+        <Route element={<Navigate to="/links" replace />} path="/resources/*" />
         <Route element={<LinksPage />} path="/links" />
         <Route element={<NotFoundPage />} path="*" />
       </Routes>

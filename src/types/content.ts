@@ -80,7 +80,7 @@ export type Department = {
 
 export type SearchResult = {
   id: string;
-  type: "News" | "Upcoming" | "Department" | "Resource";
+  type: "News" | "Upcoming" | "Department" | "Resource" | "Link";
   title: string;
   description: string;
   meta: string;

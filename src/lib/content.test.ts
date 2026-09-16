@@ -8,6 +8,8 @@ import {
   searchHub,
 } from "./content";
 import type { NewsItem } from "../types/content";
+import retiredFixtures from "../../fixtures/retired-reader-samples.json";
+const lifecycleFixtures = retiredFixtures as NewsItem[];
 
 const betaDate = new Date("2026-08-25T12:00:00-07:00");
 const NOW = new Date("2026-09-01T12:00:00.000Z").getTime();
@@ -100,13 +102,13 @@ describe("news publication boundaries", () => {
 
 describe("content lifecycle", () => {
   it("keeps future scheduled and archived content out of active feeds", () => {
-    const active = getActiveNews(betaDate);
+    const active = getActiveNews(betaDate, lifecycleFixtures);
     expect(active.some((item) => item.status === "scheduled")).toBe(false);
     expect(active.some((item) => item.status === "archived")).toBe(false);
   });
 
   it("shows real scheduled content at its publish time despite a future effective date", () => {
-    const active = getActiveNews(new Date("2026-08-27T09:00:00-07:00"));
+    const active = getActiveNews(new Date("2026-08-27T09:00:00-07:00"), lifecycleFixtures);
     const scheduled = active.find((item) => item.slug === "policy-review-window-opens");
 
     expect(scheduled?.status).toBe("scheduled");
@@ -116,12 +118,12 @@ describe("content lifecycle", () => {
   });
 
   it("keeps a pinned urgent item at the top of Important News", () => {
-    const important = getImportantNews(betaDate);
+    const important = getImportantNews(betaDate, lifecycleFixtures);
     expect(important[0].slug).toBe("annual-emergency-drill-updated-arrival-plan");
   });
 
   it("keeps expired content available through archive history", () => {
-    const archive = getArchivedNews(betaDate);
+    const archive = getArchivedNews(betaDate, lifecycleFixtures);
     expect(archive.some((item) => item.slug === "archived-sample-campaign")).toBe(true);
   });
 
@@ -131,23 +133,23 @@ describe("content lifecycle", () => {
 });
 
 describe("search", () => {
-  it("searches news content, departments, upcoming items, and resources", () => {
-    expect(searchHub("handoff", betaDate).some((result) => result.type === "News")).toBe(true);
+  it("searches departments and live events but never retired examples or resources", () => {
+    expect(searchHub("handoff", betaDate)).toEqual([]);
     expect(searchHub("Programs", betaDate).some((result) => result.type === "Department")).toBe(true);
-    expect(searchHub("meeting", betaDate).some((result) => result.type === "Upcoming")).toBe(true);
-    expect(searchHub("incident", betaDate).some((result) => result.type === "Resource")).toBe(true);
+    expect(searchHub("meeting", betaDate).some((result) => result.type === "Upcoming")).toBe(false);
+    expect(searchHub("incident", betaDate).some((result) => result.type === "Resource")).toBe(false);
   });
 
-  it("distinguishes approved resource destinations from sample placeholders", () => {
+  it("finds the official Onboarding link without exposing dormant resources", () => {
     const onboarding = searchHub("Onboarding", betaDate).find(
-      (result) => result.id === "resource-013",
+      (result) => result.type === "Link",
     );
     const placeholder = searchHub("incident", betaDate).find(
       (result) => result.id === "resource-002",
     );
 
-    expect(onboarding?.meta).toBe("Onboarding");
-    expect(onboarding?.href).toBe("/resources?focus=resource-013");
-    expect(placeholder?.meta).toContain("Link pending approval");
+    expect(onboarding?.meta).toBe("Official Bethlehem Inn destination");
+    expect(onboarding?.href).toBe("/links");
+    expect(placeholder).toBeUndefined();
   });
 });

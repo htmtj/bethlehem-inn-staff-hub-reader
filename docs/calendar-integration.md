@@ -1,52 +1,52 @@
-# Approved read-only Calendar feed
+# Read-only, privacy-safe Calendar mirror
 
-## Sources and permissions
+## Authority and audience
+The Reader is public and requires no login. On September 16, 2026 the owner explicitly approved publishing the existence and exact timing of **every valid Case Management occurrence**, including otherwise-private appointments, under neutral titles where needed. Timing can itself reveal activity; this is an intentional organizational disclosure decision, not a claim that removing names makes all schedules anonymous.
 
-The public Reader consumes only the Cloudflare Pages Function `/api/calendar`. The Function reads:
+This replaces the old prefix-only inclusion policy. No per-event approval, GitHub content commit, manual sync, or application redeployment is needed for a new event.
 
-- **Bethlehem Inn Staff Hub Events**: `c_9ebfb87e322a0337c45664a545ed09ab877983d3fd73dbceaf8af5f76b270122@group.calendar.google.com`. Intentionally curated events are eligible.
-- **Case Management**: `casemanagement@bethleheminn.org`. Only titles beginning with the exact prefix `[STAFF HUB]` are eligible.
+## Sources and unchanged credentials
+- Case Management: `casemanagement@bethleheminn.org` — operational source of truth.
+- Bethlehem Inn Staff Hub Events: `c_9ebfb87e322a0337c45664a545ed09ab877983d3fd73dbceaf8af5f76b270122@group.calendar.google.com` — existing intentionally curated supplemental source.
+- Service identity: `staff-hub-calendar-reader@clean-axiom-454114-m3.iam.gserviceaccount.com`.
+- Encrypted Production secret: `GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON`.
+- Scope: `https://www.googleapis.com/auth/calendar.events.readonly`.
+- Calendar sharing remains See event details. No write permission, domain-wide delegation, key creation, IAM change, cron, or mirror datastore was added.
 
-No events are copied between calendars. This supersedes the proposed write-sync approach that Workspace policy prevented. No cron, mirror database, new infrastructure, key, IAM role or policy change is required.
+Google Calendar sharing remains restricted even though the sanitized Staff Hub output is public. Avoid duplicating the same event into both sources: different source records deliberately retain separate identities.
 
-The existing service identity is `staff-hub-calendar-reader@clean-axiom-454114-m3.iam.gserviceaccount.com`. Its existing JSON credential stays in encrypted **Production** secret `GOOGLE_CALENDAR_SERVICE_ACCOUNT_JSON`. The sole scope remains `https://www.googleapis.com/auth/calendar.events.readonly`, with **See event details** required on each calendar. The service token contains no delegated-user `sub` claim. The browser connector is not the application credential.
+## Case Management title projection
+Classification happens only inside the server Function, before its response:
+1. Exact known service names (case-insensitive, outer whitespace ignored) map to fixed public labels: Worksource, Worksource-BIRCH, DCBH, DCBH @ BIRCH, Yoga, Yoga at BIRCH / Yoga-BIRCH, Sound Bath / Sound Bath-Bend, Ideal Option / Ideal Option-Bend, Participant Job Fair-Bend.
+2. The explicit class `P&P Intake` or `P&P Intake - ` plus private source text maps to the constant `P&P Intake`. No suffix is copied or parsed.
+3. Any other valid occurrence becomes `Case Management Event`. Missing or malformed titles also get this neutral label; malformed timing or cancellation never becomes an event.
+4. The legacy `[STAFF HUB]` prefix is optional. It does not by itself expose unknown raw titles.
+5. A deliberate separate safe title remains supported: `[STAFF HUB] [TITLE: Approved public title]` followed by private source text. Only the reviewed TITLE value is used. Never put names, identifiers, or case information in that public value. Malformed overrides get the neutral label, not the raw remainder.
 
-Staff Hub Events is owned by `jobs@bethleheminn.org`; its Google calendar is not public. Existing organization visibility is unchanged. **Auto-accept invitations → Do not show invitations** was saved and verified after reload September 11, 2026. The Reader itself is public even though Google calendar sharing is restricted.
+This is controlled classification, not name stripping. Unknown types appear immediately as neutral occurrences; adding a new descriptive service-class label later is a bounded code/configuration change, not a requirement for the event to appear.
 
-## Staff approval workflow
+Case Management requests only `id,summary,status,start,end`. Output contains the safe title, timing, all-day flag, an opaque namespaced ID, and fixed contract fields. Description/location are empty and link is null. No descriptions, attendees, attachments, conference information, organizer, creator, extended properties, or raw payloads are requested/exposed. No Case Management location is currently approved for direct copying. A place in a fixed service label is not copied from a location field.
 
-1. Select an organizational event whose **staff-facing title and timing** have been approved for the public Reader. Never expose participant identities or case notes.
-2. Review its title and timing for **public web visibility**. The software does not identify or redact participant names from an approved title.
-3. Add the exact prefix, for example `[STAFF HUB] WorkSource-BIRCH`. Leading spaces, different capitalization or a marker later in the title do not qualify.
-4. Save in Google Calendar. For recurring events, deliberately choose the occurrence(s) or series being approved.
-5. Open Staff Hub Calendar and use **Refresh calendar**. Visible Reader tabs also refresh every five minutes. Opening Search performs a fresh read.
+The dedicated curated calendar retains its previously approved title/description/location projection.
 
-### Separate safe display title
+## Recurrence, edits and deletion
+Each read uses Google's expanded occurrence list (`singleEvents=true`), including recurring exceptions and moved occurrences. Cancellation is excluded both upstream (`showDeleted=false`) and by normalization. Full successful reads replace the previous feed, so removed events do not remain as stored copies.
 
-If a Case Management title must retain private operational text, the explicit syntax is `[STAFF HUB] [TITLE: P&P Intake]` followed by the original private title. Only `P&P Intake` is returned to the Reader. The separate display title must be deliberately approved; the service does not guess or automatically redact names. Do not include participant names, initials or other identifying information inside the `[TITLE: ...]` value. Use a non-empty title of at most 200 characters, without square brackets or newlines. Malformed overrides are excluded, never displayed as raw titles.
+Source-aware SHA-256 IDs are stable across edits to an occurrence and prevent collisions between calendars. Pagination is independent per source. All pages must succeed before that source is accepted. Each source has a 15-second deadline and a 20-page cap; the API request has bounded dates (previous month through six months ahead), Pacific time, and a one-day UTC boundary pad. All-day exclusive ends and multi-day spans are preserved.
 
-For a recurring non-sensitive service, approve the series title once using Google Calendar's series-edit option. Expanded occurrences inherit the approval; review any individually edited exceptions separately. An override approves timing as well as its generic title: do not approve an appointment whose timing itself is confidential. No real participant appointment is used for testing this feature.
+## Actual freshness, not an instant push guarantee
+- The Function reads Google on every API request and sends `Cache-Control: no-store`.
+- Calendar, Home Upcoming, Departments, and Search use the same normalized event contract.
+- Visible Reader subscribers refresh every **60 seconds** and on tab focus/visibility return. Route entry and opening Search also read the feed.
+- Simultaneous subscribers share the same in-flight request; completed responses are not cached.
+- The Calendar's Checked timestamp comes from the successful server response, not a fabricated activity clock.
+- Expected foreground change visibility is the next poll plus Google/network latency. This is polling, not a webhook/instant-sync SLA. Hidden/offline tabs cannot update until resumed/reconnected.
+- If a source fails, none of its partial pages are exposed. The other source remains with a partial warning. Both failing yields a generic unavailable response. Reader failures clear prior calendar data and invite retry; they are not shown as a genuine empty schedule.
 
-Edits appear on the next successful read. Removing the prefix or cancelling/deleting an event removes it from subsequent feeds. Already-open pages may retain previously approved content until their next refresh; this is not an instant revocation channel. Do not duplicate approved Case Management events manually into Staff Hub Events.
+## Privacy and acceptance tests
+Mock tests cover registered services, generic intake, unknown types, malformed titles, raw-field exclusion, recurring occurrences/exceptions, moved times, cancelled/deleted events, pagination, independent failures, timed/all-day conversion, exclusive multi-day ends, Pacific DST, Home/Calendar identical sanitization, and loading/empty/partial/error states.
 
-## Privacy boundary
+Live QA compares the connector's source events against the public API without writing private source details into reports. A disposable, transparent, attendee-free test series may be created/edited/deleted using the owner's existing Calendar access solely for authorized propagation testing; the Staff Hub integration itself remains read-only.
 
-Case Management requests only `id,summary,status,start,end`. The backend checks the untouched prefix before projecting any event. Malformed, cancelled, invalid-date and empty-title records fail closed.
-
-Approved Case Management output includes only title without the prefix, timing, all-day state, an opaque ID and fixed fields needed by the existing Reader contract. Description/location are empty; link is null. Category/department are fixed values, not source metadata. Descriptions, guests, conference links, attachments, locations, notes, creators, organizers and extended properties are not requested or included even if unexpectedly present upstream. Raw event bodies and source errors are never logged or returned.
-
-The curated Staff Hub Events projection retains its intentionally approved title, description and location. Existing seed/sample events are not used as Calendar fallback.
-
-## Reliability
-
-Each source has independent pagination, a 15-second deadline, a 20-page limit, the same bounded rolling range, Pacific time and expanded recurring occurrences. All-day dates retain their exclusive end date.
-
-If any page fails, that source's partial pages are discarded. Valid events from the other source remain available with `availability: "partial"` and a visible incomplete-information notice. If both sources or credentials fail, HTTP 503 returns only a generic unavailable response. Responses use `Cache-Control: no-store`.
-
-IDs hash the calendar ID plus occurrence ID. Repeated source records deduplicate; identical IDs from different calendars cannot overwrite one another. Separate manually created copies of the same real-world event remain distinct. Title/time heuristics must not collapse legitimate distinct events. No private source data is persisted in GitHub or KV.
-
-## Verification
-
-Synthetic mock tests cover exact approval, unapproved organizational/intake exclusion, metadata stripping, malformed records, all-day/Pacific dates, independent pagination, stable namespaced IDs, edits, approval removal, cancellation and source failure isolation.
-
-Live acceptance requires the service-account Case Management reader ACL plus one deliberately approved non-sensitive event compared through the public API and rendered Calendar. Unapproved records must remain absent without copying private details into logs, reports or test fixtures. No fabricated production events are needed.
+## Reader content and tester guidance
+Resources is dormant infrastructure, not a Reader feature. `/resources` redirects to `/links`; Home, Departments, and Search do not expose the old resource directory. Nine fictional seed announcements were moved intact to `fixtures/retired-reader-samples.json`, outside production content. They are not relabeled as real information. Administrators should create fresh approved announcements through Staff Admin.

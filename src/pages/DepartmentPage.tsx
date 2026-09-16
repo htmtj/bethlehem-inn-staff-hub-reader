@@ -2,13 +2,11 @@ import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { DepartmentIcon } from "../components/ContentIcons";
 import { NewsList } from "../components/NewsList";
-import { ResourceList } from "../components/ResourceList";
 import { UpcomingList } from "../components/UpcomingList";
 import { useCalendarEvents } from "../hooks/useCalendarEvents";
 import {
   formatDate,
   getActiveNews,
-  getActiveResources,
   getDepartment,
   isImportantNews,
 } from "../lib/content";
@@ -23,7 +21,6 @@ export function DepartmentPage() {
   const departmentNews = getActiveNews().filter((item) => item.department === department.id);
   const important = departmentNews.find(isImportantNews);
   const departmentEvents = events.filter((item) => item.department === department.id);
-  const departmentResources = getActiveResources().filter((item) => item.department === department.id);
 
   return (
     <>
@@ -36,7 +33,7 @@ export function DepartmentPage() {
             <div>
               <h1>{department.displayName}</h1>
               <p>{department.description}</p>
-              <span>{department.ownerLabel}</span>
+              {department.ownerLabel ? <span>{department.ownerLabel}</span> : null}
             </div>
             <span className="department-hero__icon"><DepartmentIcon id={department.id} size={86} /></span>
           </div>
@@ -76,11 +73,6 @@ export function DepartmentPage() {
             {state === "partial" ? <p className="feed-notice" role="status">Some calendar information is temporarily unavailable.</p> : null}
             <UpcomingList items={departmentEvents} loading={state === "loading"} />
             <Link className="text-link section-link" to="/upcoming">View all upcoming <ArrowRight aria-hidden="true" size={18} /></Link>
-          </section>
-          <section aria-labelledby="department-resources-heading">
-            <h2 id="department-resources-heading">{department.name} resources</h2>
-            <ResourceList items={departmentResources} />
-            <Link className="text-link section-link" to={`/resources?department=${department.id}`}>View all resources <ArrowRight aria-hidden="true" size={18} /></Link>
           </section>
         </aside>
       </div>

@@ -4,6 +4,7 @@ import newsJson from "../content/news.json";
 import resourcesJson from "../content/resources.json";
 import { hubDateKey } from "./eventDates";
 import { lifecycleState } from "./lifecycle";
+import { staffLinks } from "./staffLinks";
 import type {
   Department,
   EventItem,
@@ -69,7 +70,7 @@ export function getActiveEvents(now = new Date()): EventItem[] {
   return events
     .filter(
       (item) =>
-        lifecycleState(item, timestamp) === "published" &&
+        !item.sample && lifecycleState(item, timestamp) === "published" &&
         asTime(item.endAt ?? item.startAt) >= dayStart.getTime(),
     )
     .sort((a, b) => asTime(a.startAt) - asTime(b.startAt));
@@ -149,26 +150,18 @@ export function searchHub(query: string, now = new Date(), calendarEvents?: Even
       href: `/departments/${department.id}`,
     }));
 
-  const resourceResults: SearchResult[] = getActiveResources(now)
-    .filter((item) =>
-      matches([
-        item.title,
-        item.description,
-        item.category,
-        item.resourceType,
-        getDepartmentName(item.department),
-      ]),
-    )
+  const linkResults: SearchResult[] = staffLinks
+    .filter((item) => matches([item.title, item.description]))
     .map((item) => ({
-      id: item.id,
-      type: "Resource",
+      id: item.href,
+      type: "Link",
       title: item.title,
       description: item.description,
-      meta: `${item.category}${item.destinationUrl ? "" : " · Link pending approval"}`,
-      href: `/resources?focus=${item.id}`,
+      meta: "Official Bethlehem Inn destination",
+      href: "/links",
     }));
 
-  return [...newsResults, ...eventResults, ...departmentResults, ...resourceResults];
+  return [...newsResults, ...eventResults, ...departmentResults, ...linkResults];
 }
 
 export function formatDate(value: string): string {

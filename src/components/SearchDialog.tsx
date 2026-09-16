@@ -47,7 +47,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
         <div className="search-dialog__header">
           <div>
             <h2>Search the Staff Hub</h2>
-            <p>Find active updates, upcoming items, departments, and staff resources.</p>
+            <p>Find active updates, calendar events, departments, and official links.</p>
           </div>
           <button aria-label="Close search" className="icon-button" onClick={onClose} type="button">
             <X aria-hidden="true" />
@@ -59,14 +59,14 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           <input
             autoComplete="off"
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Try “Programs”, “meeting”, or “incident”"
+            placeholder="Try “Programs”, “Yoga”, or “Onboarding”"
             ref={inputRef}
             type="search"
             value={query}
           />
         </label>
         <div aria-live="polite" className="search-results">
-          {state === "unavailable" ? <p className="feed-notice">Calendar search is temporarily unavailable. Updates, departments, and resources are still searchable.</p> : null}
+          {state === "unavailable" ? <p className="feed-notice">Calendar search is temporarily unavailable. Updates, departments, and links are still searchable.</p> : null}
           {state === "partial" ? <p className="feed-notice" role="status">Some calendar events may be missing from these results. Try again later.</p> : null}
           {!query.trim() ? (
             <p className="search-prompt">Start typing to search current Staff Hub content.</p>
@@ -95,7 +95,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             <div className="empty-state">
               <Search aria-hidden="true" />
               <h3>No results found</h3>
-              <p>Try a department, resource category, event, or shorter phrase.</p>
+              <p>Try a department, event, official link, or shorter phrase.</p>
             </div>
           )}
         </div>

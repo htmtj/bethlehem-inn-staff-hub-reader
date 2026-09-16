@@ -22,26 +22,26 @@ export function NewsPage() {
       <section aria-labelledby="news-feed-heading">
         <div className="section-heading-row news-heading-row">
           <div>
-            <h2 id="news-feed-heading">{showArchive ? "Archive / history" : importantOnly ? "Important news" : "Latest updates"}</h2>
+            <h2 id="news-feed-heading">{showArchive ? "Archive / history" : importantOnly ? "Important updates" : "Latest updates"}</h2>
             <p>{showArchive ? "Expired and archived updates." : "Newest relevant items first."}</p>
           </div>
           <button className="button button--secondary" onClick={() => setShowArchive((value) => !value)} type="button">
-            {showArchive ? "Return to active news" : "View archive"}
+            {showArchive ? "Return to active updates" : "View archive"}
           </button>
         </div>
         <div className="filter-bar">
           <label className="search-input">
             <Search aria-hidden="true" size={20} />
-            <span className="sr-only">Search news</span>
+            <span className="sr-only">Search updates</span>
             <input
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search news and updates"
+              placeholder="Search updates"
               type="search"
               value={query}
             />
           </label>
           <label>
-            <span className="sr-only">Filter news by department</span>
+            <span className="sr-only">Filter updates by department</span>
             <select onChange={(event) => setDepartment(event.target.value)} value={department}>
               <option value="all">All departments</option>
               {departments.map((item) => (

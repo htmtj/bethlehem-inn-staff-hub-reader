@@ -14,7 +14,7 @@ export function UpcomingPage() {
 function UpcomingContent() {
   const [department, setDepartment] = useState("all");
   const [category, setCategory] = useState("all");
-  const { events: active, state, range, refresh } = useCalendarEvents();
+  const { events: active, state, range, refresh, fetchedAt } = useCalendarEvents();
   const categories = Array.from(new Set(active.map((item) => item.category))).sort();
   const filtered = useMemo(
     () => active.filter((item) =>
@@ -30,8 +30,9 @@ function UpcomingContent() {
         <span><CalendarDays aria-hidden="true" /></span>
         <div>
           <h1>Calendar</h1>
-          <p>Approved staff events, services, and dates. All times are Pacific.</p>
+          <p>Services, activities, and organizational dates. All times are Pacific.</p>
         </div>
+        {fetchedAt ? <p className="calendar-freshness">Checked {new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit", timeZone: "America/Los_Angeles", timeZoneName: "short" }).format(new Date(fetchedAt))} · Updates automatically every minute while open.</p> : null}
       </header>
       {state === "unavailable" ? (
         <p className="feed-notice" role="status">Calendar could not be refreshed. Try again in a moment.</p>

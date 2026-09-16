@@ -109,7 +109,7 @@ export function AppShell({ children }: PropsWithChildren) {
       <footer aria-hidden={searchOpen} className="site-footer" inert={searchOpen ? true : undefined}>
         <div className="page-width site-footer__inner">
           <img alt="Bethlehem Inn — shelter, help, hope" src="/brand/bi-wordmark.jpg" />
-          <p>Staff information, updates, and resources.</p>
+          <p>Staff updates, events, and useful links.</p>
         </div>
       </footer>
       <SearchDialog onClose={closeSearch} open={searchOpen} />

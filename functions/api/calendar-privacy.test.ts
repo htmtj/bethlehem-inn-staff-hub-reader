@@ -13,10 +13,10 @@ const approved = {
 const project = (events: unknown[]) => normalizeCalendarEvents(events as never, "2026-09-01T00:00:00Z", "caseManagement");
 const isCase = (url: URL) => decodeURIComponent(url.pathname).includes(CASE_MANAGEMENT_CALENDAR_ID);
 
-describe("Case Management public approval boundary", () => {
+describe("Case Management safe public representation", () => {
   it.each(["DCBH @ BIRCH", "Yoga at BIRCH", "WorkSource-BIRCH"])("supports explicitly approved recurring service titles: %s", title => {
     const events = project([1, 2].map(index => ({ ...approved, id: `occurrence-${index}`, summary: `[STAFF HUB] ${title}` })));
-    expect(events.map(event => event.title)).toEqual([title, title]);
+    expect(events.map(event => event.title)).toEqual([title.replace("WorkSource", "Worksource"), title.replace("WorkSource", "Worksource")]);
   });
   it("projects an explicitly supplied intake label without exposing the private source title in API or rendered Reader", () => {
     const rawTitle = "P&P Intake - Synthetic Participant X. (m)";
@@ -30,13 +30,13 @@ describe("Case Management public approval boundary", () => {
   });
   it("fails closed for malformed or empty title overrides instead of exposing the remainder", () => {
     for (const marker of ["[TITLE:]", "[TITLE: ]", "[TITLE: safe", "[title: safe]", "[TITLE: safe]PRIVATE", "[TITLE: <b></b>]"]) {
-      expect(project([{ ...approved, summary: `[STAFF HUB] ${marker} PRIVATE_SENTINEL` }])).toEqual([]);
+      expect(project([{ ...approved, summary: `[STAFF HUB] ${marker} PRIVATE_SENTINEL` }])[0].title).toBe("Case Management Event");
     }
   });
-  it("admits only the exact title prefix and strips it for display", () => {
-    expect(project([approved])[0].title).toBe("WorkSource-BIRCH");
-    for (const summary of ["WorkSource-BIRCH", "Participant intake - Synthetic Person", " [STAFF HUB] WorkSource", "[staff hub] WorkSource", "WorkSource [STAFF HUB]", "[STAFF HUB]", "[STAFF HUB] <b></b>", null]) {
-      expect(project([{ ...approved, summary }])).toEqual([]);
+  it("preserves explicit public labels and uses neutral labels for unknown source text", () => {
+    expect(project([approved])[0].title).toBe("Worksource-BIRCH");
+    for (const summary of ["Participant intake - Synthetic Person", " [STAFF HUB] WorkSource", "[staff hub] WorkSource", "WorkSource [STAFF HUB]", "[STAFF HUB]", "[STAFF HUB] <b></b>", null]) {
+      expect(project([{ ...approved, summary }])[0].title).toBe("Case Management Event");
     }
   });
   it("omits private metadata even if the upstream sends more fields than requested", () => {
@@ -97,7 +97,7 @@ describe("Independent read-only sources", () => {
     }));
     const result = await fetchMergedCalendarEvents("test-token", range);
     expect(result.availability).toBe("partial");
-    expect(result.events.length).toBe(failed === "hub" ? 1 : 2);
+    expect(result.events.length).toBe(2);
     expect(JSON.stringify(result)).not.toContain("PRIVATE_ERROR_BODY");
     if (failed === "hub") expect(JSON.stringify(result)).not.toContain("PRIVATE_SENTINEL");
   });
@@ -105,15 +105,15 @@ describe("Independent read-only sources", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("PRIVATE_ERROR_BODY", { status: 503 })));
     await expect(fetchMergedCalendarEvents("test-token", range)).rejects.toThrow("Calendar feed unavailable");
   });
-  it("reflects approval removal, edits and cancellation on the next read without stored copies", async () => {
+  it("reflects renames, neutral reclassification and cancellation without stored copies", async () => {
     let current = approved;
     vi.stubGlobal("fetch", vi.fn(async () => Response.json({ items: [current] })));
     const first = await fetchCalendarPages("test-token", range, "caseManagement");
-    current = { ...approved, summary: "[STAFF HUB] Updated title" };
+    current = { ...approved, summary: "[STAFF HUB] DCBH @ BIRCH" };
     const edited = await fetchCalendarPages("test-token", range, "caseManagement");
-    expect(edited[0].id).toBe(first[0].id); expect(edited[0].title).toBe("Updated title");
+    expect(edited[0].id).toBe(first[0].id); expect(edited[0].title).toBe("DCBH @ BIRCH");
     current = { ...approved, summary: "Approval removed" };
-    expect(await fetchCalendarPages("test-token", range, "caseManagement")).toEqual([]);
+    expect((await fetchCalendarPages("test-token", range, "caseManagement"))[0].title).toBe("Case Management Event");
     current = { ...approved, status: "cancelled" };
     expect(await fetchCalendarPages("test-token", range, "caseManagement")).toEqual([]);
   });

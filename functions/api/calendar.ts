@@ -40,6 +40,16 @@ export const STAFF_HUB_CALENDAR_ID =
   "c_9ebfb87e322a0337c45664a545ed09ab877983d3fd73dbceaf8af5f76b270122@group.calendar.google.com";
 export const CASE_MANAGEMENT_CALENDAR_ID = "casemanagement@bethleheminn.org";
 export const APPROVAL_PREFIX = "[STAFF HUB]";
+// Fixed public vocabulary. Never copy a suffix from a sensitive/unknown source title.
+const operationalTitles = new Map([
+  ["worksource-birch", "Worksource-BIRCH"], ["worksource", "Worksource"],
+  ["worksource / worksource-birch", "Worksource-BIRCH"],
+  ["dcbh @ birch", "DCBH @ BIRCH"], ["dcbh", "DCBH"],
+  ["yoga at birch", "Yoga at BIRCH"], ["yoga-birch", "Yoga at BIRCH"], ["yoga", "Yoga"],
+  ["sound bath-bend", "Sound Bath-Bend"], ["sound bath", "Sound Bath"],
+  ["ideal option-bend", "Ideal Option-Bend"], ["ideal option", "Ideal Option"],
+  ["participant job fair-bend", "Participant Job Fair-Bend"],
+]);
 type CalendarSource = "hub" | "caseManagement";
 const calendarIds = { hub: STAFF_HUB_CALENDAR_ID, caseManagement: CASE_MANAGEMENT_CALENDAR_ID };
 const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events.readonly";
@@ -145,6 +155,23 @@ export function approvedCaseManagementTitle(summary: unknown): string | null {
   return cleanText(remainder, 200) || null;
 }
 
+/** Timing for every valid occurrence was explicitly approved for the public Reader.
+ * Unknown titles remain private; malformed overrides get a neutral representation.
+ */
+export function publicCaseManagementTitle(summary: unknown): string {
+  if (typeof summary !== "string") return "Case Management Event";
+  let title = summary.trim();
+  if (summary.startsWith(APPROVAL_PREFIX)) {
+    const remainder = summary.slice(APPROVAL_PREFIX.length).trim();
+    // Only a deliberate separate TITLE value may supply a custom public label.
+    // A legacy prefix alone never makes an unknown/raw participant title public.
+    if (remainder.startsWith("[")) return approvedCaseManagementTitle(summary) ?? "Case Management Event";
+    title = remainder;
+  }
+  if (title === "P&P Intake" || title.startsWith("P&P Intake - ")) return "P&P Intake";
+  return operationalTitles.get(title.toLowerCase()) ?? "Case Management Event";
+}
+
 export function normalizeCalendarEvents(
   items: GoogleCalendarEvent[],
   publishedAt = new Date().toISOString(),
@@ -153,8 +180,6 @@ export function normalizeCalendarEvents(
   return items.flatMap((item) => {
     if (!item || typeof item !== "object" || item.status === "cancelled" || typeof item.id !== "string" || !item.id) return [];
     const restricted = source === "caseManagement";
-    // Check the untouched title: leading whitespace, case variants and embedded markers are not approval.
-    if (restricted && (typeof item.summary !== "string" || !item.summary.startsWith(APPROVAL_PREFIX))) return [];
     if (restricted && item.status !== "confirmed" && item.status !== "tentative") return [];
     if (restricted && (!item.start || !item.end ||
       (item.start.date !== undefined && item.start.dateTime !== undefined) ||
@@ -173,8 +198,7 @@ export function normalizeCalendarEvents(
     const endAt = calendarDate(allDay ? item.end?.date : item.end?.dateTime);
     if (restricted && !endAt) return [];
     if (endAt && endAt <= startAt) return [];
-    const title = restricted ? approvedCaseManagementTitle(item.summary) : cleanText(item.summary, 200);
-    if (restricted && !title) return [];
+    const title = restricted ? publicCaseManagementTitle(item.summary) : cleanText(item.summary, 200);
     const description = restricted ? "" : cleanText(item.description, 1000);
     const location = restricted ? "" : cleanText(item.location, 200) || "Bethlehem Inn";
     return [{
