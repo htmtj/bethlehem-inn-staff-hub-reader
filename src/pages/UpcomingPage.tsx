@@ -31,8 +31,8 @@ function UpcomingContent() {
         <div>
           <h1>Calendar</h1>
           <p>Services, activities, and organizational dates. All times are Pacific.</p>
-        </div>
         {fetchedAt ? <p className="calendar-freshness">Checked {new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit", timeZone: "America/Los_Angeles", timeZoneName: "short" }).format(new Date(fetchedAt))} · Updates automatically every minute while open.</p> : null}
+        </div>
       </header>
       {state === "unavailable" ? (
         <p className="feed-notice" role="status">Calendar could not be refreshed. Try again in a moment.</p>

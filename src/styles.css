@@ -12,7 +12,9 @@
   --lime-600: #9bb900;
   --lime-100: #f2f7d8;
   --gold-700: #9c6900;
+  --gold-600: #a67100;
   --gold-100: #fff3d9;
+  --gold-050: #fff9ec;
   --red-700: #b52f24;
   --red-600: #d23f32;
   --red-100: #fff0ee;
@@ -2646,7 +2648,7 @@ body {
 .important-section .section-heading-row { margin-bottom: 14px; }
 .home-clear-state { padding: 14px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--teal-050); color: var(--body); }
 .home-clear-state p { margin: 0; }
-.calendar-freshness { color: var(--muted); font-size: .78rem; margin: 0 0 12px; }
+.page-header .calendar-freshness { color: var(--muted); font-size: .78rem; margin: 6px 0 0; }
 
 .featured-news__icon {
   width: 56px;
