@@ -18,7 +18,7 @@ Google Calendar sharing remains restricted even though the sanitized Staff Hub o
 ## Case Management title projection
 Classification happens only inside the server Function, before its response:
 1. Exact known service names (case-insensitive, outer whitespace ignored) map to fixed public labels: Worksource, Worksource-BIRCH, DCBH, DCBH @ BIRCH, Yoga, Yoga at BIRCH / Yoga-BIRCH, Sound Bath / Sound Bath-Bend, Ideal Option / Ideal Option-Bend, Participant Job Fair-Bend.
-2. The explicit class `P&P Intake` or `P&P Intake - ` plus private source text maps to the constant `P&P Intake`. No suffix is copied or parsed.
+2. Owner-approved intake classes (reconfirmed September 24, 2026): `P&P` / `P&P Intake` map to the constant `P&P Intake`; `EASA` / `EASA Intake` map to `EASA Intake`. Matching is case-insensitive and accepts the exact class alone or followed by ` - ` and private source text. No suffix is copied or parsed. Other intake types remain neutral until explicitly approved; there is no generic name-guessing rule.
 3. Any other valid occurrence becomes `Case Management Event`. Missing or malformed titles also get this neutral label; malformed timing or cancellation never becomes an event.
 4. The legacy `[STAFF HUB]` prefix is optional. It does not by itself expose unknown raw titles.
 5. A deliberate separate safe title remains supported: `[STAFF HUB] [TITLE: Approved public title]` followed by private source text. Only the reviewed TITLE value is used. Never put names, identifiers, or case information in that public value. Malformed overrides get the neutral label, not the raw remainder.

@@ -354,6 +354,7 @@ export function AdminPage() {
         <p>{loadError ?? "Your publishing role could not be loaded."}</p>
         <div className="admin-state__actions">
           <button className="button button--primary" onClick={() => void load()} type="button"><RefreshCw aria-hidden="true" size={18} /> Try Again</button>
+          <a className="button button--secondary" href="/admin">Sign in again</a>
           <a className="button button--secondary" href="/">Open Staff Hub</a>
         </div>
       </main>
@@ -398,6 +399,7 @@ export function AdminPage() {
 
         {message ? <div role={messageError ? "alert" : "status"} className={`admin-message ${messageError ? "admin-message--error" : "admin-message--success"}`}>
           <p>{message}</p>
+          {messageError ? <a href="/admin" target="_blank" rel="noopener noreferrer">Open publishing / sign in again in a new tab</a> : null}
           {savedItem && savedItem.status !== "draft" ? <>
             <button className="button button--secondary" onClick={async () => {
               setDeliveryMessage("Checking the deployed Reader…");
@@ -498,6 +500,7 @@ export function AdminPage() {
           )}
         </section>
 
+        {editorError ? <p role="status"><a href="/admin" target="_blank" rel="noopener noreferrer">Open publishing / sign in again in a new tab</a>. Keep this editor open so your unsaved changes remain available.</p> : null}
         {editorType ? (
           <AdminEditor
             actor={actor}

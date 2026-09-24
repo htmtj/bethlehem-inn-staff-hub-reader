@@ -67,14 +67,14 @@ export function AppShell({ children }: PropsWithChildren) {
                 {item.label}
               </NavLink>
             ))}
-            <Link className="mobile-admin-link" to="/admin">
+            <a className="mobile-admin-link" href="/admin">
               <ShieldCheck aria-hidden="true" size={17} /> Staff Admin
-            </Link>
+            </a>
           </nav>
           <div className="header-actions">
-            <Link aria-label="Staff Admin" className="header-admin-link" title="Staff Admin" to="/admin">
+            <a aria-label="Staff Admin" className="header-admin-link" title="Staff Admin" href="/admin">
               <ShieldCheck aria-hidden="true" size={17} /> <span>Staff Admin</span>
-            </Link>
+            </a>
             <button aria-label="Search the Staff Hub" className="header-search" onClick={() => setSearchOpen(true)} type="button">
               <Search aria-hidden="true" size={20} />
               <span>Search</span>

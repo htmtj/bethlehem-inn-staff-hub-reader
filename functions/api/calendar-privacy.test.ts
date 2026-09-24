@@ -14,6 +14,21 @@ const project = (events: unknown[]) => normalizeCalendarEvents(events as never, 
 const isCase = (url: URL) => decodeURIComponent(url.pathname).includes(CASE_MANAGEMENT_CALENDAR_ID);
 
 describe("Case Management safe public representation", () => {
+  it.each([
+    ["P&P", "P&P Intake"], ["p&p intake - PRIVATE_SENTINEL", "P&P Intake"],
+    ["Easa", "EASA Intake"], ["EASA Intake - PRIVATE_SENTINEL", "EASA Intake"],
+    ["[STAFF HUB] Easa - PRIVATE_SENTINEL", "EASA Intake"],
+  ])("uses only the approved intake class for %s", (summary, title) => {
+    const events = project([{ ...approved, summary, description: "PRIVATE_SENTINEL", location: "PRIVATE_SENTINEL" }]);
+    expect(events[0].title).toBe(title);
+    const html = renderToStaticMarkup(createElement(UpcomingList, { items: events }));
+    expect(JSON.stringify(events)).not.toContain("PRIVATE_SENTINEL");
+    expect(html).not.toContain("PRIVATE_SENTINEL");
+    expect(html).toContain(title.replace("&", "&amp;"));
+  });
+  it.each(["Unapproved Intake - PRIVATE_SENTINEL", "EASA PRIVATE_SENTINEL", "PRIVATE_SENTINEL EASA Intake", "EASAX - PRIVATE_SENTINEL"])("does not infer an intake class from arbitrary text: %s", summary => {
+    expect(project([{ ...approved, summary }])[0].title).toBe("Case Management Event");
+  });
   it.each(["DCBH @ BIRCH", "Yoga at BIRCH", "WorkSource-BIRCH"])("supports explicitly approved recurring service titles: %s", title => {
     const events = project([1, 2].map(index => ({ ...approved, id: `occurrence-${index}`, summary: `[STAFF HUB] ${title}` })));
     expect(events.map(event => event.title)).toEqual([title.replace("WorkSource", "Worksource"), title.replace("WorkSource", "Worksource")]);

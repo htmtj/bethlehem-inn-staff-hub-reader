@@ -50,6 +50,13 @@ const operationalTitles = new Map([
   ["ideal option-bend", "Ideal Option-Bend"], ["ideal option", "Ideal Option"],
   ["participant job fair-bend", "Participant Job Fair-Bend"],
 ]);
+// Explicitly approved intake classes, not generic name detection/redaction.
+// Only these exact class names (optionally followed by " - " and private text)
+// may emit a fixed intake label. Never copy any part of the suffix.
+const intakeTitles = new Map([
+  ["p&p", "P&P Intake"], ["p&p intake", "P&P Intake"],
+  ["easa", "EASA Intake"], ["easa intake", "EASA Intake"],
+]);
 type CalendarSource = "hub" | "caseManagement";
 const calendarIds = { hub: STAFF_HUB_CALENDAR_ID, caseManagement: CASE_MANAGEMENT_CALENDAR_ID };
 const CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events.readonly";
@@ -168,8 +175,11 @@ export function publicCaseManagementTitle(summary: unknown): string {
     if (remainder.startsWith("[")) return approvedCaseManagementTitle(summary) ?? "Case Management Event";
     title = remainder;
   }
-  if (title === "P&P Intake" || title.startsWith("P&P Intake - ")) return "P&P Intake";
-  return operationalTitles.get(title.toLowerCase()) ?? "Case Management Event";
+  const normalized = title.toLowerCase();
+  for (const [sourceClass, publicLabel] of intakeTitles) {
+    if (normalized === sourceClass || normalized.startsWith(`${sourceClass} - `)) return publicLabel;
+  }
+  return operationalTitles.get(normalized) ?? "Case Management Event";
 }
 
 export function normalizeCalendarEvents(
