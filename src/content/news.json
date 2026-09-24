@@ -9,12 +9,12 @@
     ],
     "department": "kitchen",
     "category": "Department update",
-    "publishedAt": "2026-10-24T14:58:00.000Z",
+    "publishedAt": "2026-09-24T14:59:51.027Z",
     "effectiveAt": null,
     "expiresAt": null,
-    "status": "scheduled",
+    "status": "published",
     "priority": "standard",
-    "pinned": false,
+    "pinned": true,
     "actionNeeded": false,
     "actionText": null,
     "contact": "",
@@ -22,7 +22,7 @@
     "image": null,
     "imageAlt": null,
     "createdAt": "2026-09-24T14:58:10.098Z",
-    "updatedAt": "2026-09-24T14:59:29.836Z"
+    "updatedAt": "2026-09-24T14:59:51.455Z"
   },
   {
     "id": "news-191a3fb0-3945-43a8-a2ab-ecd7bf290266",
