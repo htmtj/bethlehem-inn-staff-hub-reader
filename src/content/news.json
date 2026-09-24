@@ -1,5 +1,30 @@
 [
   {
+    "id": "news-97d09a35-7d97-4aaf-8020-25fdef5f3053",
+    "slug": "test-september-24-publishing-recovery-temporary-97d09a35",
+    "title": "TEST — September 24 publishing recovery — temporary",
+    "summary": "No staff action. Temporary technical verification; this item will be archived after testing.",
+    "body": [
+      "Temporary non-sensitive publishing verification. This is not an operational announcement."
+    ],
+    "department": "kitchen",
+    "category": "Department update",
+    "publishedAt": "2026-09-24T14:58:10.098Z",
+    "effectiveAt": null,
+    "expiresAt": null,
+    "status": "draft",
+    "priority": "standard",
+    "pinned": false,
+    "actionNeeded": false,
+    "actionText": null,
+    "contact": "",
+    "resourceLinks": [],
+    "image": null,
+    "imageAlt": null,
+    "createdAt": "2026-09-24T14:58:10.098Z",
+    "updatedAt": "2026-09-24T14:58:10.098Z"
+  },
+  {
     "id": "news-191a3fb0-3945-43a8-a2ab-ecd7bf290266",
     "slug": "test-staff-hub-design-release-verification-september-15-191a3fb0",
     "title": "TEST — Staff Hub design release verification — September 15",
