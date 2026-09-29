@@ -44,7 +44,7 @@ The reader UI consumes normalized selectors in `src/lib/content.ts`, allowing a 
 
 ## Calendar and deployment boundaries
 
-`functions/api/calendar.ts` reads the dedicated Staff Hub calendar and Case Management independently using a server-side credential with the Calendar events read-only scope. Case Management occurrences require the exact `[STAFF HUB]` prefix. The mapper emits fixed safe labels or an explicitly supplied `[TITLE: ...]` public label, removes descriptions/locations/links/private metadata, and hashes source IDs. Source owners must not put confidential data in an explicit public TITLE. Partial-source failure is disclosed without inventing events.
+`functions/api/calendar.ts` reads the dedicated Staff Hub calendar and Case Management independently using a server-side credential with the Calendar events read-only scope. Case Management mirrors valid occurrences without requiring a title marker; source titles are reduced to the established safe labels or a neutral label. The mapper emits fixed safe labels or an explicitly supplied `[TITLE: ...]` public label, removes descriptions/locations/links/private metadata, and hashes source IDs. Source owners must not put confidential data in an explicit public TITLE. Partial-source failure is disclosed without inventing events.
 
 Calendar dates/times use America/Los_Angeles; Admin datetime inputs explicitly use the publisher device's local timezone. Resources remain absent from Reader navigation and `/resources` redirects to Links. Legacy resource publishing remains in Admin; saving a resource does not add it to Links.
 

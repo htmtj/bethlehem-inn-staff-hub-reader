@@ -162,8 +162,8 @@ export function approvedCaseManagementTitle(summary: unknown): string | null {
   return cleanText(remainder, 200) || null;
 }
 
-/** Called only after the explicit approval gate. Unknown titles remain private;
- * malformed overrides get a neutral representation.
+/** Timing for every valid occurrence was explicitly approved for the public Reader.
+ * Unknown titles remain private; malformed overrides get a neutral representation.
  */
 export function publicCaseManagementTitle(summary: unknown): string {
   if (typeof summary !== "string") return "Case Management Event";
@@ -190,8 +190,6 @@ export function normalizeCalendarEvents(
   return items.flatMap((item) => {
     if (!item || typeof item !== "object" || item.status === "cancelled" || typeof item.id !== "string" || !item.id) return [];
     const restricted = source === "caseManagement";
-    // Safe labels alone do not authorize disclosure of an occurrence or its timing.
-    if (restricted && (typeof item.summary !== "string" || !item.summary.startsWith(APPROVAL_PREFIX))) return [];
     if (restricted && item.status !== "confirmed" && item.status !== "tentative") return [];
     if (restricted && (!item.start || !item.end ||
       (item.start.date !== undefined && item.start.dateTime !== undefined) ||

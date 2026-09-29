@@ -7,9 +7,11 @@ import { normalizeCalendarEvents } from "../../functions/api/calendar";
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
 describe("Calendar audit regressions", () => {
   const occurrence = { id: "synthetic", summary: "P&P Intake - PRIVATE_SENTINEL", status: "confirmed", start: { date: "2026-09-28" }, end: { date: "2026-09-29" } };
-  it("omits unapproved Case Management occurrences, including their timing", () => {
+  it("retains existing Case Management occurrences without a marker while keeping private text out", () => {
     for (const summary of [occurrence.summary, "Yoga at BIRCH", "[staff hub] Yoga", " [STAFF HUB] Yoga", "Yoga [STAFF HUB]", undefined]) {
-      expect(normalizeCalendarEvents([{ ...occurrence, summary }], undefined, "caseManagement")).toEqual([]);
+      const events = normalizeCalendarEvents([{ ...occurrence, summary }], undefined, "caseManagement");
+      expect(events).toHaveLength(1);
+      expect(JSON.stringify(events)).not.toContain("PRIVATE_SENTINEL");
     }
     expect(normalizeCalendarEvents([{ ...occurrence, summary: "[STAFF HUB] P&P Intake - PRIVATE_SENTINEL" }], undefined, "caseManagement")).toHaveLength(1);
     expect(normalizeCalendarEvents([occurrence], undefined, "hub")).toHaveLength(1);
