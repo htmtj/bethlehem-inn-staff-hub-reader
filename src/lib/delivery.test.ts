@@ -10,6 +10,16 @@ const admin: Actor = { email: "admin@example.invalid", role: "admin", department
 const publisher: Actor = { email: "publisher@example.invalid", role: "publisher", department: "kitchen" };
 const input = { title: "Delivery fixture", summary: "Non-sensitive fixture", body: ["Fixture body"], status: "published", priority: "standard", department: "kitchen" };
 describe("safe Reader refresh and truthful lifecycle labels", () => {
+  it("does not claim hidden Resources will appear or are live in the Reader", () => {
+    for (const status of ["published", "scheduled", "archived", "draft"] as const) {
+      expect(publicationMessage(status, "resources")).toContain("not displayed");
+      expect(publicationMessage(status, "resources")).not.toContain("will become visible");
+      const item = { id: "legacy-custom-id", contentType: "resources" as const, status, updatedAt: "2026-09-01T00:00:00Z" };
+      const message = deliveryState({ buildId: "release", items: [item] }, item);
+      expect(message).toContain("not displayed");
+      expect(message).not.toContain("Verified live");
+    }
+  });
   const oldBuild = "2026-09-14T10:00:00Z";
   const newBuild = "2026-09-14T11:00:00Z";
   it("preserves route, Calendar date, filters and hash", () => {

@@ -7,10 +7,10 @@ import { UpcomingList } from "../../src/components/UpcomingList";
 import { eventOnDate, formatEventTime } from "../../src/lib/eventDates";
 
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
-const base = { id: "synthetic-occurrence", summary: "Yoga at BIRCH", status: "confirmed", start: { dateTime: "2026-11-02T09:00:00-08:00" }, end: { dateTime: "2026-11-02T10:00:00-08:00" } };
+const base = { id: "synthetic-occurrence", summary: "[STAFF HUB] Yoga at BIRCH", status: "confirmed", start: { dateTime: "2026-11-02T09:00:00-08:00" }, end: { dateTime: "2026-11-02T10:00:00-08:00" } };
 const project = (items: unknown[]) => normalizeCalendarEvents(items as never, "2026-11-01T00:00:00Z", "caseManagement");
 
-describe("continuous safe Calendar mirror", () => {
+describe("approval-gated safe Calendar projection", () => {
   it.each([
     [{ loading: true }, "Checking the calendar"],
     [{ unavailable: true }, "Calendar temporarily unavailable"],
@@ -21,26 +21,26 @@ describe("continuous safe Calendar mirror", () => {
     const html = renderToStaticMarkup(createElement(CalendarView, { events: [], ...state, range: { start: "2026-11-01", end: "2027-01-01" } }));
     expect(html).toContain(message);
   });
-  it.each(["Worksource-BIRCH", "DCBH @ BIRCH", "Yoga at BIRCH", "Sound Bath-Bend", "Ideal Option-Bend", "Participant Job Fair-Bend"])("automatically includes established service %s without a marker", title => {
-    expect(project([{ ...base, summary: title }])[0].title).toBe(title);
+  it.each(["Worksource-BIRCH", "DCBH @ BIRCH", "Yoga at BIRCH", "Sound Bath-Bend", "Ideal Option-Bend", "Participant Job Fair-Bend"])("includes explicitly approved service %s", title => {
+    expect(project([{ ...base, summary: `[STAFF HUB] ${title}` }])[0].title).toBe(title);
   });
-  it("includes all valid new unknown occurrences without their source titles", () => {
+  it("omits unapproved and missing-title occurrences", () => {
     const events = project([base, { ...base, id: "new", summary: "PRIVATE_NEW_CATEGORY" }, { ...base, id: "missing-title", summary: undefined }]);
-    expect(events).toHaveLength(3);
-    expect(events.map(e => e.title)).toEqual(["Yoga at BIRCH", "Case Management Event", "Case Management Event"]);
+    expect(events).toHaveLength(1);
+    expect(events.map(e => e.title)).toEqual(["Yoga at BIRCH"]);
     expect(JSON.stringify(events)).not.toContain("PRIVATE_NEW_CATEGORY");
   });
   it("uses the fixed intake class label, never arbitrary name stripping", () => {
-    expect(project([{ ...base, summary: "P&P Intake - Synthetic Participant X. (m)" }])[0].title).toBe("P&P Intake");
+    expect(project([{ ...base, summary: "[STAFF HUB] P&P Intake - Synthetic Participant X. (m)" }])[0].title).toBe("P&P Intake");
     expect(project([{ ...base, summary: "[STAFF HUB] P&P Intake - PRIVATE_SENTINEL" }])[0].title).toBe("P&P Intake");
     expect(project([{ ...base, summary: "[STAFF HUB] PRIVATE_NEW_CATEGORY" }])[0].title).toBe("Case Management Event");
-    expect(project([{ ...base, summary: "Private meeting - Synthetic Participant X. (m)" }])[0].title).toBe("Case Management Event");
-    expect(project([{ ...base, summary: "Yoga at BIRCH - Synthetic Participant" }])[0].title).toBe("Case Management Event");
+    expect(project([{ ...base, summary: "[STAFF HUB] Private meeting - Synthetic Participant X. (m)" }])[0].title).toBe("Case Management Event");
+    expect(project([{ ...base, summary: "[STAFF HUB] Yoga at BIRCH - Synthetic Participant" }])[0].title).toBe("Case Management Event");
   });
   it("keeps raw private fields out of both Calendar and Home Upcoming markup", () => {
     vi.useFakeTimers(); vi.setSystemTime(new Date("2026-11-02T08:00:00-08:00"));
     vi.stubGlobal("window", { location: { search: "?date=2026-11-02" } });
-    const events = project([{ ...base, summary: "P&P Intake - PRIVATE_SENTINEL", location: "PRIVATE_SENTINEL", description: "PRIVATE_SENTINEL", attendees: ["PRIVATE_SENTINEL"], attachments: ["PRIVATE_SENTINEL"], organizer: "PRIVATE_SENTINEL", creator: "PRIVATE_SENTINEL" }]);
+    const events = project([{ ...base, summary: "[STAFF HUB] P&P Intake - PRIVATE_SENTINEL", location: "PRIVATE_SENTINEL", description: "PRIVATE_SENTINEL", attendees: ["PRIVATE_SENTINEL"], attachments: ["PRIVATE_SENTINEL"], organizer: "PRIVATE_SENTINEL", creator: "PRIVATE_SENTINEL" }]);
     const home = renderToStaticMarkup(createElement(UpcomingList, { items: events }));
     const calendar = renderToStaticMarkup(createElement(CalendarView, { events, range: { start: "2026-11-01", end: "2027-01-01" } }));
     for (const output of [JSON.stringify(events), home, calendar]) expect(output).not.toContain("PRIVATE_SENTINEL");
@@ -55,7 +55,7 @@ describe("continuous safe Calendar mirror", () => {
     const original = await read();
     items = [base, { ...base, id: "future-occurrence", start: { dateTime: "2026-11-09T09:00:00-08:00" }, end: { dateTime: "2026-11-09T10:00:00-08:00" } }];
     expect(await read()).toHaveLength(2);
-    items[0] = { ...base, summary: "DCBH @ BIRCH", start: { dateTime: "2026-11-03T11:00:00-08:00" }, end: { dateTime: "2026-11-03T12:30:00-08:00" } };
+    items[0] = { ...base, summary: "[STAFF HUB] DCBH @ BIRCH", start: { dateTime: "2026-11-03T11:00:00-08:00" }, end: { dateTime: "2026-11-03T12:30:00-08:00" } };
     const edited = (await read()).find(e => e.id === original[0].id)!;
     expect(edited.title).toBe("DCBH @ BIRCH"); expect(edited.startAt).toBe("2026-11-03T19:00:00.000Z");
     items[0] = { ...items[0], status: "cancelled" };

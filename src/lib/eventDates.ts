@@ -3,6 +3,20 @@ import type { EventItem } from "../types/content";
 export const HUB_TIME_ZONE = "America/Los_Angeles";
 export type CalendarRange = { start: string; end: string };
 
+export function isCalendarDate(value: string): boolean {
+  const time = Date.parse(value);
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value;
+}
+
+/** Upcoming includes ongoing events, but never a completed occurrence. */
+export function isUpcomingEvent(event: EventItem, now = new Date()): boolean {
+  if (event.allDay || /^\d{4}-\d{2}-\d{2}$/.test(event.startAt)) {
+    const today = hubDateKey(now);
+    return event.endAt ? event.endAt > today : event.startAt >= today;
+  }
+  return Date.parse(event.endAt ?? event.startAt) > now.getTime();
+}
+
 export function hubDateKey(value: string | Date): string {
   if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
   const parts = new Intl.DateTimeFormat("en-US", { timeZone: HUB_TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(value));

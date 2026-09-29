@@ -19,15 +19,13 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
 
   useEffect(() => {
     if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.setTimeout(() => inputRef.current?.focus(), 20);
+    const focusTimer = window.setTimeout(() => inputRef.current?.focus(), 20);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      window.clearTimeout(focusTimer);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [open, onClose]);

@@ -1,7 +1,7 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Clock3, MapPin } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getDepartmentName } from "../lib/content";
-import { calendarRange, eventOnDate, formatEventDate, formatEventTime, hubDateKey, type CalendarRange } from "../lib/eventDates";
+import { calendarRange, eventOnDate, formatEventDate, formatEventTime, hubDateKey, isCalendarDate, type CalendarRange } from "../lib/eventDates";
 import type { EventItem } from "../types/content";
 
 type Props = {
@@ -42,7 +42,7 @@ export function CalendarView({ events, loading = false, unavailable = false, par
   const todayKey = hubDateKey(new Date());
   const today = new Date(`${todayKey}T12:00:00`);
   const requestedDate = new URLSearchParams(window.location.search).get("date");
-  const firstEventDate = requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate) && requestedDate >= range.start && requestedDate < range.end ? requestedDate : todayKey;
+  const firstEventDate = requestedDate && isCalendarDate(requestedDate) && requestedDate >= range.start && requestedDate < range.end ? requestedDate : todayKey;
   const [cursor, setCursor] = useState(() => {
     const [year, month] = firstEventDate.split("-").map(Number);
     return new Date(year, month - 1, 1);

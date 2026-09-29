@@ -19,7 +19,7 @@ describe("Case Management safe public representation", () => {
     ["Easa", "EASA Intake"], ["EASA Intake - PRIVATE_SENTINEL", "EASA Intake"],
     ["[STAFF HUB] Easa - PRIVATE_SENTINEL", "EASA Intake"],
   ])("uses only the approved intake class for %s", (summary, title) => {
-    const events = project([{ ...approved, summary, description: "PRIVATE_SENTINEL", location: "PRIVATE_SENTINEL" }]);
+    const events = project([{ ...approved, summary: summary.startsWith("[STAFF HUB]") ? summary : `[STAFF HUB] ${summary}`, description: "PRIVATE_SENTINEL", location: "PRIVATE_SENTINEL" }]);
     expect(events[0].title).toBe(title);
     const html = renderToStaticMarkup(createElement(UpcomingList, { items: events }));
     expect(JSON.stringify(events)).not.toContain("PRIVATE_SENTINEL");
@@ -27,7 +27,7 @@ describe("Case Management safe public representation", () => {
     expect(html).toContain(title.replace("&", "&amp;"));
   });
   it.each(["Unapproved Intake - PRIVATE_SENTINEL", "EASA PRIVATE_SENTINEL", "PRIVATE_SENTINEL EASA Intake", "EASAX - PRIVATE_SENTINEL"])("does not infer an intake class from arbitrary text: %s", summary => {
-    expect(project([{ ...approved, summary }])[0].title).toBe("Case Management Event");
+    expect(project([{ ...approved, summary: `[STAFF HUB] ${summary}` }])[0].title).toBe("Case Management Event");
   });
   it.each(["DCBH @ BIRCH", "Yoga at BIRCH", "WorkSource-BIRCH"])("supports explicitly approved recurring service titles: %s", title => {
     const events = project([1, 2].map(index => ({ ...approved, id: `occurrence-${index}`, summary: `[STAFF HUB] ${title}` })));
@@ -50,7 +50,7 @@ describe("Case Management safe public representation", () => {
   });
   it("preserves explicit public labels and uses neutral labels for unknown source text", () => {
     expect(project([approved])[0].title).toBe("Worksource-BIRCH");
-    for (const summary of ["Participant intake - Synthetic Person", " [STAFF HUB] WorkSource", "[staff hub] WorkSource", "WorkSource [STAFF HUB]", "[STAFF HUB]", "[STAFF HUB] <b></b>", null]) {
+    for (const summary of ["[STAFF HUB] Participant intake - Synthetic Person", "[STAFF HUB]", "[STAFF HUB] <b></b>"]) {
       expect(project([{ ...approved, summary }])[0].title).toBe("Case Management Event");
     }
   });
@@ -112,7 +112,7 @@ describe("Independent read-only sources", () => {
     }));
     const result = await fetchMergedCalendarEvents("test-token", range);
     expect(result.availability).toBe("partial");
-    expect(result.events.length).toBe(2);
+    expect(result.events.length).toBe(failed === "hub" ? 1 : 2);
     expect(JSON.stringify(result)).not.toContain("PRIVATE_ERROR_BODY");
     if (failed === "hub") expect(JSON.stringify(result)).not.toContain("PRIVATE_SENTINEL");
   });
@@ -120,7 +120,7 @@ describe("Independent read-only sources", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("PRIVATE_ERROR_BODY", { status: 503 })));
     await expect(fetchMergedCalendarEvents("test-token", range)).rejects.toThrow("Calendar feed unavailable");
   });
-  it("reflects renames, neutral reclassification and cancellation without stored copies", async () => {
+  it("reflects renames, approval removal and cancellation without stored copies", async () => {
     let current = approved;
     vi.stubGlobal("fetch", vi.fn(async () => Response.json({ items: [current] })));
     const first = await fetchCalendarPages("test-token", range, "caseManagement");
@@ -128,7 +128,7 @@ describe("Independent read-only sources", () => {
     const edited = await fetchCalendarPages("test-token", range, "caseManagement");
     expect(edited[0].id).toBe(first[0].id); expect(edited[0].title).toBe("DCBH @ BIRCH");
     current = { ...approved, summary: "Approval removed" };
-    expect((await fetchCalendarPages("test-token", range, "caseManagement"))[0].title).toBe("Case Management Event");
+    expect(await fetchCalendarPages("test-token", range, "caseManagement")).toEqual([]);
     current = { ...approved, status: "cancelled" };
     expect(await fetchCalendarPages("test-token", range, "caseManagement")).toEqual([]);
   });

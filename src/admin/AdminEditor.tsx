@@ -4,6 +4,7 @@ import { getDepartmentName } from "../lib/content";
 import type { ContentStatus } from "../types/content";
 import type { AdminActor, AdminContentType, ManagedContent } from "./types";
 import { publishingIntent } from "./publishingIntent";
+import { updatePrimaryLink } from "./relatedLinks";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 
 type EditorValue = {
@@ -206,9 +207,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
         actionText: value.actionText || null,
         contact: value.contact,
         pinned: isAdmin && value.pinned,
-        resourceLinks: value.relatedLinkUrl
-          ? [{ label: value.relatedLinkLabel || "Open resource", url: value.relatedLinkUrl }]
-          : [],
+        resourceLinks: updatePrimaryLink(editing?.contentType === "news" ? editing.item.resourceLinks : [], value.relatedLinkLabel, value.relatedLinkUrl),
       };
     }
     if (value.contentType === "events") {
@@ -249,7 +248,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
       </div>
 
       {error ? <p className="admin-message admin-message--error" role="alert">{error}</p> : null}
-      <p className="admin-message">{value.status === "draft" ? "Save Draft keeps this item out of Reader views." : value.status === "scheduled" ? "This item becomes visible after the selected publish time and a successful site deployment." : "Publishing updates the public, no-login Reader after the site deploys."} Include only information approved for public display. Dates use your device’s local timezone.</p>
+      <p className="admin-message">{value.contentType === "resources" ? "Resources are not displayed in the current Reader; Links are managed separately." : value.status === "draft" ? "Save Draft keeps this item out of Reader views." : value.status === "scheduled" ? "This item becomes visible after the selected publish time and a successful site deployment." : "Publishing updates the public, no-login Reader after the site deploys."} Include only information approved for public display. Dates use your device’s local timezone.</p>
       {isEdPublisher ? <p className="admin-message">Published messages appear in Updates, Latest Updates, search, and Administration. Important priority may also place a message in Important updates. The Reader is public: include only information approved for public display.</p> : null}
 
       <form className="admin-form" onSubmit={(event) => event.preventDefault()}>
@@ -335,7 +334,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
               </label>
               <label className="admin-check admin-check--field">
                 <input checked={value.featured} onChange={(event) => change("featured", event.target.checked)} type="checkbox" />
-                <span><strong>Featured / Quick Resource</strong><small>Surface this in the reader’s quick resources area.</small></span>
+                <span><strong>Featured / Quick Resource</strong><small>Legacy metadata only; this does not add the resource to the Reader.</small></span>
               </label>
             </>
           ) : null}
@@ -449,7 +448,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
 
         <div className="admin-form__actions">
           <button className="button button--secondary" onClick={() => setPreviewOpen(true)} type="button">
-            <Eye aria-hidden="true" size={18} /> Preview as Staff Will See It
+            <Eye aria-hidden="true" size={18} /> {value.contentType === "resources" ? "Preview record" : "Preview as Staff Will See It"}
           </button>
           {value.status !== "draft" ? <button className="button button--secondary" disabled={saving || !value.title.trim()} onClick={() => void save("draft")} type="button">
             <Save aria-hidden="true" size={18} /> Save Draft
@@ -471,7 +470,7 @@ export function AdminEditor({ actor, contentType, editing, error, onCancel, onSa
           <section ref={previewRef} aria-labelledby="preview-heading" aria-modal="true" className="admin-preview" role="dialog">
             <div className="admin-preview__heading">
               <div>
-                <span>Staff view preview</span>
+                <span>{value.contentType === "resources" ? "Record preview" : "Staff view preview"}</span>
                 <h2 id="preview-heading">{value.title || "Untitled draft"}</h2>
               </div>
               <button aria-label="Close preview" className="icon-button" onClick={() => setPreviewOpen(false)} type="button"><X aria-hidden="true" /></button>

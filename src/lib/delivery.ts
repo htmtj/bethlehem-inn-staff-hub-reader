@@ -1,7 +1,7 @@
 import { lifecycleState } from "./lifecycle";
 import type { ContentStatus } from "../types/content";
 
-export type DeliveryItem = { id: string; status: ContentStatus; updatedAt?: string | null; publishedAt?: string | null; expiresAt?: string | null; startAt?: string | null; endAt?: string | null; sample?: boolean };
+export type DeliveryItem = { id: string; status: ContentStatus; contentType?: "news" | "events" | "resources"; updatedAt?: string | null; publishedAt?: string | null; expiresAt?: string | null; startAt?: string | null; endAt?: string | null; sample?: boolean };
 export type ReaderReceipt = { buildId: string; items: DeliveryItem[] };
 
 export async function loadReaderReceipt(): Promise<ReaderReceipt> {
@@ -17,6 +17,7 @@ export function deliveryState(receipt: ReaderReceipt, expected: DeliveryItem, no
   const actual = receipt.items.find(item => item.id === expected.id);
   if (!actual || !expected.updatedAt || actual.updatedAt !== expected.updatedAt || actual.status !== expected.status ||
       actual.publishedAt !== expected.publishedAt || actual.expiresAt !== expected.expiresAt) return "Saved; deployment is still pending. Check again shortly.";
+  if (expected.contentType === "resources") return "Deployed resource record. Resources are not displayed in the current Reader; Links are managed separately.";
   const state = lifecycleState(actual, now);
   if (state === "scheduled") return "Deployed and scheduled. It will appear at its publish time.";
   if (state === "archived") return "Deployed; this item is no longer in active Reader views.";

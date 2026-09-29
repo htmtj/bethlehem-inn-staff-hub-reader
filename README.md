@@ -8,7 +8,7 @@ A clean Phase 1 reader experience for Bethlehem Inn organizational news, departm
 - Static structured content in `src/content/*.json`
 - Client-side lifecycle filtering and search
 - The Reader is public and has no authentication requirement. Protected `/admin` publishing uses Cloudflare Access Email OTP, a `STAFF_HUB_ROLES` KV binding, and server-side GitHub Contents API writes with SHA conflict checks.
-- Netlify static deployment with a private GitHub source repository
+- GitHub `main` → Cloudflare Pages production deployment. The current GitHub repository is public; the dashboard controls Pages build settings and bindings.
 
 ## Local development
 
@@ -25,7 +25,7 @@ pnpm check
 
 ## Content safety
 
-All current entries are fictional sample content. Because the reader beta is unauthenticated, every item must be treated as internet-visible. Do not add confidential, participant, HR, employee, credential, security, or other protected information.
+The Reader and source repository are public. Every saved record, including drafts and scheduled records, must be treated as internet-visible even when lifecycle filters hide it from Reader views. Those filters are not access controls. Do not add confidential, participant, HR, employee, credential, security, or other protected information.
 
 ## Content files
 
@@ -42,4 +42,10 @@ The reader UI consumes normalized selectors in `src/lib/content.ts`, allowing a 
 - `admin` manages all supported content and department scopes.
 - `ed_publisher` manages only News items in the `Executive Director Message` lane (`lane: "executive-director-message"`, department `administration`). This role can create, edit, schedule, and archive ED messages and cannot manage events, resources, or other departments.
 
-The current Google Calendar connection is a read-only planning dependency. The production Reader must not fetch the Case Management calendar until a server-side credential is stored in the deployment environment and the public-event data policy is approved. Calendar records may include participant or case details that do not belong in a public Reader feed.
+## Calendar and deployment boundaries
+
+`functions/api/calendar.ts` reads the dedicated Staff Hub calendar and Case Management independently using a server-side credential with the Calendar events read-only scope. Case Management occurrences require the exact `[STAFF HUB]` prefix. The mapper emits fixed safe labels or an explicitly supplied `[TITLE: ...]` public label, removes descriptions/locations/links/private metadata, and hashes source IDs. Source owners must not put confidential data in an explicit public TITLE. Partial-source failure is disclosed without inventing events.
+
+Calendar dates/times use America/Los_Angeles; Admin datetime inputs explicitly use the publisher device's local timezone. Resources remain absent from Reader navigation and `/resources` redirects to Links. Legacy resource publishing remains in Admin; saving a resource does not add it to Links.
+
+Use `pnpm check` before proposing a release. Production deployment requires approval; pushing main triggers Cloudflare Pages. No live content/role/Access-policy changes are part of ordinary local QA. The checked-in Wrangler file describes an older Workers asset deployment and is ignored by the current Pages build; do not treat it as the full production configuration.

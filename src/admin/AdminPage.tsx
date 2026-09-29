@@ -136,7 +136,7 @@ function PreviewDialog({ managed, onClose }: { managed: ManagedContent; onClose:
       <section ref={dialogRef} aria-labelledby="row-preview-heading" aria-modal="true" className="admin-preview" role="dialog">
         <div className="admin-preview__heading">
           <div>
-            <span>Staff view preview</span>
+            <span>{managed.contentType === "resources" ? "Record preview" : "Staff view preview"}</span>
             <h2 id="row-preview-heading">{managed.item.title}</h2>
           </div>
           <button aria-label="Close preview" className="icon-button" onClick={onClose} type="button"><X aria-hidden="true" /></button>
@@ -278,7 +278,7 @@ export function AdminPage() {
       // The mutation receipt is server truth. A subsequent list-read failure must not invite a duplicate create.
       setContent((current) => current ? updateLocalContent(current, contentType, result.item, operation, result.sha) : current);
       setMessage(result.message);
-      setSavedItem(result.item as DeliveryItem & { slug?: string });
+      setSavedItem({ ...result.item, contentType } as DeliveryItem & { slug?: string });
       setEditorType(null);
       setEditing(null);
       setStatus(displayStatus(result.item as DeliveryItem));
@@ -316,7 +316,7 @@ export function AdminPage() {
       setContent((current) => current ? updateLocalContent(current, archiving.contentType, archivedItem, "archive", result.sha) : current);
       setArchiving(null);
       setMessage(result.message);
-      setSavedItem(result.item as DeliveryItem & { slug?: string });
+      setSavedItem({ ...result.item, contentType: archiving.contentType } as DeliveryItem & { slug?: string });
       setStatus("archived");
       if (!import.meta.env.DEV) {
         try {
@@ -405,8 +405,8 @@ export function AdminPage() {
               setDeliveryMessage("Checking the deployed Reader…");
               try { setDeliveryMessage(deliveryState(await loadReaderReceipt(), savedItem)); }
               catch (error) { setDeliveryMessage(error instanceof Error ? error.message : "Could not verify delivery."); }
-            }}>Check Reader</button>{" "}
-            <a className="button button--secondary" href={savedItem.slug ? `/news/${savedItem.slug}` : "/"} target="_blank" rel="noopener">Open Reader</a>
+            }}>{savedItem.contentType === "resources" ? "Check deployment" : "Check Reader"}</button>{" "}
+            {savedItem.contentType !== "resources" ? <a className="button button--secondary" href={savedItem.slug ? `/news/${savedItem.slug}` : "/"} target="_blank" rel="noopener">Open Reader</a> : null}
             {deliveryMessage ? <p>{deliveryMessage}</p> : null}
           </> : null}
         </div> : null}

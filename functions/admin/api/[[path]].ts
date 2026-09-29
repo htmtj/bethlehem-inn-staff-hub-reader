@@ -224,7 +224,7 @@ async function handleRequest(context: FunctionContext): Promise<Response> {
       item: changed.item,
       commitUrl: write.commitUrl,
       sha: write.contentSha,
-      message: publicationMessage(changed.item.status as ContentStatus),
+      message: publicationMessage(changed.item.status as ContentStatus, mutation.contentType),
     });
   }
 

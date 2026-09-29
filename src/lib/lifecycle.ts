@@ -20,7 +20,8 @@ export function lifecycleLabel(item: LifecycleItem, now = Date.now()): string {
   return state === "published" ? "Published / active" : state[0].toUpperCase() + state.slice(1);
 }
 
-export function publicationMessage(status: ContentStatus): string {
+export function publicationMessage(status: ContentStatus, contentType?: "news" | "events" | "resources"): string {
+  if (contentType === "resources") return "Resource record saved. Resources are not displayed in the current Reader; Links are managed separately.";
   if (status === "draft") return "Draft saved. It is not visible in the Reader.";
   if (status === "scheduled") return "Schedule saved. It will become visible at its publish time after deployment.";
   if (status === "archived" || status === "expired") return "Archive saved. Removal from active Reader views is pending deployment.";

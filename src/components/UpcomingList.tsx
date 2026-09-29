@@ -1,10 +1,11 @@
 import { CalendarDays, MapPin } from "lucide-react";
 import { getDepartmentName } from "../lib/content";
-import { formatEventDate, formatEventTime, hubDateKey } from "../lib/eventDates";
+import { formatEventDate, formatEventTime, isUpcomingEvent } from "../lib/eventDates";
 import type { EventItem } from "../types/content";
 
 export function UpcomingList({ items, limit, loading = false }: { items: EventItem[]; limit?: number; loading?: boolean }) {
-  const upcoming = items.filter((item) => hubDateKey(item.endAt ?? item.startAt) >= hubDateKey(new Date()));
+  const now = new Date();
+  const upcoming = items.filter((item) => isUpcomingEvent(item, now));
   const visibleItems = typeof limit === "number" ? upcoming.slice(0, limit) : upcoming;
 
   if (loading || !visibleItems.length) {
